@@ -31,6 +31,6 @@ desc=MeetingZone(MZ)
 <img src="https://img.shields.io/badge/qt-41CD52?style=for-the-badge&logo=qt&logoColor=41CD52"/>
 
 ## 문서 작업
-<img src="https://img.shields.io/badge/notion-000000?style=for-the-badge&logo=notion&logoColor=000000"/>[노션](https://www.notion.so/1308005f00ed80fda05ff2005c953468?v=1308005f00ed803aba52000c744c70d9&pvs=4)
+<img src="https://img.shields.io/badge/notion-000000?style=for-the-badge&logo=notion&logoColor=000000"/>
 <img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=5865F2"/>
 
