@@ -1,15 +1,5 @@
-<img src="https://capsule-render.vercel.app/api?
-type=wave
-&color=black
-&height=300
-&section=header
-&text=capsule%20render
-desc=MeetingZone(MZ)
-&textBg=true
-&fontSize=90
-&fontColor=ffee00
-&animation=fadeIn"
-/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=auto&height=200&section=header&text=내용입력&fontSize=90" />
+
 
 # MeetingZone-MZ-
 
