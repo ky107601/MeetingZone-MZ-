@@ -25,5 +25,12 @@ desc=MeetingZone(MZ)
 김시후, 김연경, 김유진, 김한중, 이재용
 
   
-## 개발 환경
+## 🛠개발 환경
 <img src="https://img.shields.io/badge/raspberrypi-A22846?style=for-the-badge&logo=raspberrypi&logoColor=A22846"/>
+<img src="https://img.shields.io/badge/cplusplus-00599C?style=for-the-badge&logo=cplusplus&logoColor=00599C"/>
+<img src="https://img.shields.io/badge/qt-41CD52?style=for-the-badge&logo=qt&logoColor=41CD52"/>
+
+## 문서 작업
+<img src="https://img.shields.io/badge/notion-000000?style=for-the-badge&logo=notion&logoColor=000000"/>[노션](https://www.notion.so/1308005f00ed80fda05ff2005c953468?v=1308005f00ed803aba52000c744c70d9&pvs=4)
+<img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=5865F2"/>
+
