@@ -26,4 +26,4 @@ desc=MeetingZone(MZ)
 
   
 ## 개발 환경
-<img src="https://img.shields.io/badge/raspberrypi-A22846?style=flat&logo=RaspberryPi5&logoColor=A22846"/>
+<img src="https://img.shields.io/badge/raspberrypi-A22846?style=for-the-badge&logo=RaspberryPi5&logoColor=A22846"/>
