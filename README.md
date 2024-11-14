@@ -1,4 +1,5 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=FA812F&height=200&section=header&text=MeetingZone(MZ)&fontSize=90" />
+
 **MZ** 는 다중 영상 채팅 프로그램으로, 자신의 영상을 원하는 좌표로 이동 가능한 것이 특징이다. 
 
   
