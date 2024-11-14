@@ -26,7 +26,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="page">
     <widget class="QFrame" name="inputBox">
@@ -79,7 +79,7 @@ font-weight : 900;</string>
 font-weight : 900;</string>
       </property>
       <property name="text">
-       <string>nickname</string>
+       <string>Nickname</string>
       </property>
      </widget>
      <widget class="QPushButton" name="enterBtn">
@@ -133,7 +133,7 @@ border-radius : 10px;</string>
       </property>
      </widget>
     </widget>
-    <widget class="QFrame" name="titleBar_3">
+    <widget class="QFrame" name="titleBar">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -141,6 +141,12 @@ border-radius : 10px;</string>
        <width>801</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>801</width>
+       <height>16777215</height>
+      </size>
      </property>
      <property name="styleSheet">
       <string notr="true">background-color : #FA812F</string>
@@ -164,7 +170,7 @@ border-radius : 10px;</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="image.qrc">:/Downloads/Meeting Zone.png</pixmap>
+       <pixmap resource="image.qrc">:/resources/Meeting Zone.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>
@@ -173,6 +179,25 @@ border-radius : 10px;</string>
        <bool>true</bool>
       </property>
      </widget>
+    </widget>
+    <widget class="QLabel" name="logo">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>160</y>
+       <width>331</width>
+       <height>321</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="image.qrc">:/resources/sample_logo 1.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="page_2">
@@ -207,7 +232,7 @@ border-radius : 10px;</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="image.qrc">:/Downloads/Meeting Zone.png</pixmap>
+       <pixmap resource="image.qrc">:/resources/Meeting Zone.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>
@@ -238,12 +263,69 @@ font-size : 15px;</string>
        <x>10</x>
        <y>39</y>
        <width>781</width>
-       <height>471</height>
+       <height>461</height>
       </rect>
      </property>
      <property name="styleSheet">
       <string notr="true">background-color : white;
 border-radius : 10px;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="image.qrc">:/resources/default_background.jpg</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="exitBtn">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>510</y>
+       <width>51</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : rgba(254, 243, 226, 0);
+border-radius : 10px;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="videoBtn">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>510</y>
+       <width>51</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : rgba(254, 243, 226, 0);
+border-radius : 10px;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="micBtn">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>510</y>
+       <width>51</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : rgba(254, 243, 226, 0);
+border-radius:10px;</string>
      </property>
      <property name="text">
       <string/>

@@ -8,6 +8,7 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    //this->showMaximized();
 
     /* Set the inputBox style */
     QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect();
@@ -23,8 +24,24 @@ Widget::Widget(QWidget *parent)
         ui->stackedWidget->setCurrentIndex(1);
     });
 
-    //ui->chatInput->setAlignment(Qt::AlignVCenter);
     ui->chatInput->setPlaceholderText("Enter your text here ...");
+
+    QIcon micIcon(":/resources/mic_off.png");
+    ui->micBtn->setIcon(micIcon);
+    ui->micBtn->setIconSize(QSize(35,35));
+
+    QIcon videoIcon(":/resources/video_off.png");
+    ui->videoBtn->setIcon(videoIcon);
+    ui->videoBtn->setIconSize(QSize(35,35));
+
+    QIcon exitIcon(":/resources/exit.png");
+    ui->exitBtn->setIcon(exitIcon);
+    ui->exitBtn->setIconSize(QSize(35,35));
+
+    connect(ui->exitBtn, &QPushButton::clicked, this, [&](){
+        ui->stackedWidget->setCurrentIndex(0);
+    });
+
 }
 
 Widget::~Widget()
