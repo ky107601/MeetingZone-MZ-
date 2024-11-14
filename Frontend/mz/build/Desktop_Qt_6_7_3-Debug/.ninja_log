@@ -1,9 +1,0 @@
-# ninja log v5
-2	660	1731550665090683718	mz_autogen/timestamp	f9c742fbc66d0d04
-2	660	1731550665090683718	mz_autogen/mocs_compilation.cpp	f9c742fbc66d0d04
-2	660	1731550665090683718	/home/pi/mz/build/Desktop_Qt_6_7_3-Debug/mz_autogen/timestamp	f9c742fbc66d0d04
-2	660	1731550665090683718	/home/pi/mz/build/Desktop_Qt_6_7_3-Debug/mz_autogen/mocs_compilation.cpp	f9c742fbc66d0d04
-660	3283	1731550667714698736	CMakeFiles/mz.dir/mz_autogen/mocs_compilation.cpp.o	d1c3860f0cf8ff39
-661	3318	1731550667750698942	CMakeFiles/mz.dir/main.cpp.o	cc7da8ffb34fce42
-661	3329	1731550667762699010	CMakeFiles/mz.dir/widget.cpp.o	d0ebca70ed40973b
-3329	3841	1731550668274701943	mz	ef6a6f8dcbc9a853
