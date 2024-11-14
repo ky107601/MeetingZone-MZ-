@@ -1,5 +1,13 @@
 <RCC>
     <qresource prefix="/">
-        <file>../../../Downloads/Meeting Zone.png</file>
+        <file>resources/exit.png</file>
+        <file>resources/Meeting Zone.png</file>
+        <file>resources/mic_off.png</file>
+        <file>resources/mic_on.png</file>
+        <file>resources/moc.debug</file>
+        <file>resources/video_off.png</file>
+        <file>resources/video_on.png</file>
+        <file>resources/sample_logo 1.png</file>
+        <file>resources/default_background.jpg</file>
     </qresource>
 </RCC>
