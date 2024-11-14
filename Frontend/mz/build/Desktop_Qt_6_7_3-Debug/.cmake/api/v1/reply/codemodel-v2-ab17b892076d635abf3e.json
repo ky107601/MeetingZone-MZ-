@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-4a73f23a48882a956e81.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "mz",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "mz::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mz-Debug-ed65d51b464e7f499513.json",
+					"name" : "mz",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mz_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mz_autogen-Debug-b00493107bdccf5c34e8.json",
+					"name" : "mz_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mz_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mz_autogen_timestamp_deps-Debug-3c9bc6b77b4cbcf3a05a.json",
+					"name" : "mz_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/pi/mz/build/Desktop_Qt_6_7_3-Debug",
+		"source" : "/home/pi/mz"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}
