@@ -15,6 +15,9 @@ link_directories(${CMAKE_SOURCE_DIR}/lib)               # Link FFmpeg static lib
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(OpenCV REQUIRED)
+include_directories(/usr/include/opencv4)
+
 
 set(PROJECT_SOURCES
         main.cpp
@@ -28,6 +31,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         image.qrc
+        camerastreamer.h
+        camerastreamer.cpp
+
     )
 else()
     if(ANDROID)
