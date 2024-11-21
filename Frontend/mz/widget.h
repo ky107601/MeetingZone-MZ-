@@ -10,7 +10,10 @@
 #include <QImage>
 #include <QPixmap>
 #include <QTimer>
+#include <QEvent>
+#include <QHBoxLayout>
 #include "camerastreamer.h"
+#include "camviewer.h"
 
 using namespace cv;
 using namespace std;
@@ -38,6 +41,10 @@ public:
     QIcon videoOnIcon;
 
     VideoCapture cap;
+    QTimer *captureTimer;
+
+    camViewer *cam; //QLabel
+    string width, height;
 
 public slots:
     void changeIcon();
@@ -46,5 +53,8 @@ public slots:
 private:
     Ui::Widget *ui;
 
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 };
 #endif // WIDGET_H
