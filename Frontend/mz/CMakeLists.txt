@@ -35,7 +35,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         camerastreamer.cpp
         camviewer.h
         camviewer.cpp
-        backgroundpicture.h backgroundpicture.cpp
+        backgroundpicture.h
+        backgroundpicture.cpp
 
     )
 else()

@@ -1,4 +1,4 @@
-#include "camerastreamer.h"
+ #include "camerastreamer.h"
 
 CameraStreamer::CameraStreamer(QWidget *parent) : QWidget(parent), cap()
 {
