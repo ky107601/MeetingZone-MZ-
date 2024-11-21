@@ -10,5 +10,9 @@
         <file>resources/sample_logo 1.png</file>
         <file>resources/default_background.jpg</file>
         <file>resources/happy.png</file>
+        <file>resources/basketball.jpg</file>
+        <file>resources/change.png</file>
+        <file>resources/penguin.png</file>
+        <file>resources/plus.png</file>
     </qresource>
 </RCC>

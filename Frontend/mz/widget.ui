@@ -26,7 +26,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="page">
     <widget class="QFrame" name="inputBox">
@@ -204,9 +204,9 @@ border-radius : 10px;</string>
     <widget class="QFrame" name="titleBar_2">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>-10</x>
        <y>0</y>
-       <width>801</width>
+       <width>811</width>
        <height>31</height>
       </rect>
      </property>
@@ -222,7 +222,7 @@ border-radius : 10px;</string>
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>330</x>
+        <x>340</x>
         <y>10</y>
         <width>141</width>
         <height>21</height>
@@ -255,29 +255,6 @@ border-radius : 10px;</string>
       <string notr="true">background-color : white;
 border-radius : 10px;
 font-size : 15px;</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="background">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>39</y>
-       <width>781</width>
-       <height>461</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color : white;
-border-radius : 10px;</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap resource="image.qrc">:/resources/default_background.jpg</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
      </property>
     </widget>
     <widget class="QPushButton" name="exitBtn">
@@ -331,22 +308,84 @@ border-radius:10px;</string>
       <string/>
      </property>
     </widget>
-    <widget class="QLabel" name="videoLabel">
+    <widget class="QWidget" name="backWidget" native="true">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>70</x>
-       <y>120</y>
-       <width>161</width>
-       <height>161</height>
+       <x>0</x>
+       <y>40</y>
+       <width>791</width>
+       <height>461</height>
       </rect>
      </property>
-     <property name="styleSheet">
-      <string notr="true">background-color : white</string>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="background">
+        <property name="styleSheet">
+         <string notr="true">background-color : white;
+border-radius : 10px;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="image.qrc">:/resources/default_background.jpg</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QPushButton" name="changeBackBtn">
+     <property name="geometry">
+      <rect>
+       <x>680</x>
+       <y>510</y>
+       <width>41</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="toolTip">
+      <string>change background</string>
      </property>
      <property name="text">
-      <string> abcd</string>
+      <string/>
      </property>
     </widget>
+    <widget class="QPushButton" name="addBackBtn">
+     <property name="geometry">
+      <rect>
+       <x>740</x>
+       <y>510</y>
+       <width>41</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="toolTip">
+      <string>Add background</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <zorder>backWidget</zorder>
+    <zorder>titleBar_2</zorder>
+    <zorder>chatInput</zorder>
+    <zorder>exitBtn</zorder>
+    <zorder>videoBtn</zorder>
+    <zorder>micBtn</zorder>
+    <zorder>changeBackBtn</zorder>
+    <zorder>addBackBtn</zorder>
    </widget>
   </widget>
  </widget>

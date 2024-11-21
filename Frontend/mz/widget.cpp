@@ -29,6 +29,11 @@ Widget::Widget(QWidget *parent)
         ui->stackedWidget->setCurrentIndex(1);
     });
 
+    ui->changeBackBtn->setIcon(QIcon(":/resources/change.png"));
+    ui->addBackBtn->setIcon(QIcon(":/resources/plus.png"));
+    cam = new camViewer(ui->backWidget);
+    cam->hide();
+
     ui->chatInput->setPlaceholderText("Enter your text here ...");
 
     micOffIcon = QIcon(":/resources/mic_off.png");
@@ -55,18 +60,11 @@ Widget::Widget(QWidget *parent)
 
     connect(ui->micBtn, SIGNAL(clicked()), this, SLOT(changeIcon()));
 
-    connect(ui->videoBtn, &QPushButton::clicked, this, [&](){
-        if(!videoFlag)  //status : video off -> on
-            ui->videoBtn->setIcon(videoOnIcon);
-        else            //status : video on -> off
-            ui->videoBtn->setIcon(videoOffIcon);
-        videoFlag = !videoFlag;
-        ui->videoBtn->setIconSize(QSize(40, 40));
-    });
-
+    width="640";
+    height="480";
     string pipeline =
         "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 "
-        "! video/x-raw,width=1280,height=720,framerate=10/1,format=RGBx "
+        "! video/x-raw,width="+width+",height="+height+",framerate=10/1,format=RGBx "
         "! videoconvert ! videoscale ! appsink";
 
     if(!cap.open(pipeline, CAP_GSTREAMER))
@@ -74,11 +72,27 @@ Widget::Widget(QWidget *parent)
         qDebug()<<"Failed to open the camera!";
     }
 
-
-    QTimer *captureTimer = new QTimer(this);
+    //Set the timer to capture the frame
+    captureTimer = new QTimer(this);
     connect(captureTimer, &QTimer::timeout, this, &Widget::updateFrame);
 
-    captureTimer->start(100);
+    //ON/OFF the video
+    connect(ui->videoBtn, &QPushButton::clicked, this, [=](){
+        if(!videoFlag)  //status : video off -> on
+        {
+            ui->videoBtn->setIcon(videoOnIcon);
+            cam->show();
+            captureTimer->start(100);
+        }
+        else            //status : video on -> off
+        {
+            ui->videoBtn->setIcon(videoOffIcon);
+            captureTimer->stop();
+            cam->hide();
+        }
+        videoFlag = !videoFlag;
+        ui->videoBtn->setIconSize(QSize(40, 40));
+    });
 
 }
 
@@ -112,9 +126,31 @@ void Widget::updateFrame()
 
         cvtColor(frame, frame, COLOR_BGR2RGB); // Convert to RGB format
         QImage qimg(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888);
-        qDebug()<<"cols = "<<frame.cols<<"rows = "<<frame.rows;
-        ui->videoLabel->setFixedSize(frame.cols/5, frame.rows/5);
-        ui->videoLabel->setPixmap(QPixmap::fromImage(qimg).scaled(ui->videoLabel->size(), Qt::KeepAspectRatio));
-    }
 
+        cam->setFixedSize(frame.cols/3, frame.rows/3);
+        cam->setPixmap(QPixmap::fromImage(qimg).scaled(cam->size(), Qt::KeepAspectRatio));
+
+    }
+}
+
+
+void Widget::mouseMoveEvent(QMouseEvent* event)
+{
+    //qDebug()<<"mouseMoveEvent()";
+   // qDebug()<<event->pos();
+}
+
+void Widget::mousePressEvent(QMouseEvent* event)
+{
+    // startingPosition = pos();
+    // offset = QPoint(
+    //     event->pos().x() - pos().x() + 0.5*width(),
+    //     event->pos().y() - pos().y() + 0.5*height()
+    //     );
+}
+
+void Widget::mouseReleaseEvent(QMouseEvent* event)
+{
+    //qDebug()<<"mouseReleaseEvent()";
+    //qDebug()<<event;
 }

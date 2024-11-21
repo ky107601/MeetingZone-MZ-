@@ -30,6 +30,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         image.qrc
         camerastreamer.h
         camerastreamer.cpp
+        camviewer.h
+        camviewer.cpp
+        backgroundpicture.h backgroundpicture.cpp
 
     )
 
