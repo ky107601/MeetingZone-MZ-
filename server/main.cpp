@@ -27,6 +27,7 @@ int main() {
     while ((client_sock = accept(server_sock, (struct sockaddr *)&client, (socklen_t*)&c))) {
         thread client_thread(handle_client, client_sock);
         client_thread.detach();  // 클라이언트 요청을 새로운 스레드에서 처리
+        videoplay();
     }
 
     if (client_sock < 0) {

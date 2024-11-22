@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -O2 -I/server/nlohmann -I/server/include 
+CXXFLAGS = -std=c++17 -Wall -O2 -I/server/nlohmann -I/server/include `pkg-config --cflags opencv4`
 LDFLAGS = -pthread \
 		   ./lib/libavdevice.a \
 		   ./lib/libavcodec.a \
@@ -8,10 +8,11 @@ LDFLAGS = -pthread \
            ./lib/libavutil.a \
            ./lib/libswscale.a \
            ./lib/libswresample.a \
+		   `pkg-config --libs opencv4`
         	# -lx264 -lx265 -lvpx -lfdk-aac -lmp3lame -lopus -lvorbis
 
 TARGET = server
-SRCS = server.cpp main.cpp
+SRCS = server.cpp main.cpp video.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(TARGET)
