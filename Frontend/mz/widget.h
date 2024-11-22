@@ -13,13 +13,14 @@
 #include <QEvent>
 #include <QString>
 #include <QHBoxLayout>
-#include "camerastreamer.h"
 #include "camviewer.h"
 #include "backgroundpicture.h"
 #include <libavcodec/ac3_parser.h>
 
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QPixmap>
+#include <QFileDialog>
 
 using namespace cv;
 using namespace std;
@@ -61,6 +62,7 @@ protected:
 public slots:
     void changeIcon();
     void updateFrame();
+    void selectPicture();
 
 private:
     Ui::Widget *ui;

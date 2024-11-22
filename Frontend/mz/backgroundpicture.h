@@ -17,10 +17,13 @@ public:
     backgroundPicture();
 
     string getNextPicture();
+    void addPicture(string path);
 
 private:
     vector<string> picture; //imge path storage
     int cur; //current img index
+
 };
+
 
 #endif // BACKGROUNDPICTURE_H

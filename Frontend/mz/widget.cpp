@@ -102,6 +102,8 @@ Widget::Widget(QWidget *parent)
         qDebug() << "nextPath = " << nextPath;
         ui->background->setPixmap(QPixmap(nextPath));
     });
+
+    connect(ui->addBackBtn, SIGNAL(clicked()), this, SLOT(selectPicture()));
 }
 
 Widget::~Widget()
@@ -182,5 +184,17 @@ void Widget::keyPressEvent(QKeyEvent *event)
     {
         cam->moveByKey(event->key());
     }
+}
 
+void Widget::selectPicture()
+{
+    QString filePath = QFileDialog::getOpenFileName(nullptr, "Open Image File", "", "Images (*.png *.jpg *.jpeg *.bmp *.gif)");
+
+    if (filePath.isEmpty()) {
+        qDebug() << "No file selected.";
+        return;
+    }
+
+    ui->background->setPixmap(QPixmap(filePath));
+    picture.addPicture(filePath.toStdString());
 }
