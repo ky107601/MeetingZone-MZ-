@@ -9,15 +9,16 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Add OpenCV include directory and library directory
+include_directories(${CMAKE_SOURCE_DIR}/opencv-install/include/opencv4)  # Include OpenCV headers
+link_directories(${CMAKE_SOURCE_DIR}/opencv-install/lib)               # Link OpenCV static libraries
+
 # Add FFmpeg include directory and library directory
 include_directories(${CMAKE_SOURCE_DIR}/include/ffmpeg)  # Include FFmpeg headers
 link_directories(${CMAKE_SOURCE_DIR}/lib)               # Link FFmpeg static libraries
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
-find_package(OpenCV REQUIRED)
-include_directories(/usr/include/opencv4)
-
 
 set(PROJECT_SOURCES
         main.cpp
@@ -35,8 +36,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         camerastreamer.cpp
         camviewer.h
         camviewer.cpp
-        backgroundpicture.h backgroundpicture.cpp
-
+        backgroundpicture.h
+        backgroundpicture.cpp
     )
 else()
     if(ANDROID)
@@ -50,7 +51,7 @@ else()
     endif()
 endif()
 
-# Link FFmpeg libraries and Qt Widgets
+# Link FFmpeg libraries, Qt Widgets, and OpenCV libraries
 target_link_libraries(mz
     PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
@@ -61,6 +62,12 @@ target_link_libraries(mz
     swscale
     pthread  # FFmpeg often requires pthread
     m        # Math library
+    opencv_core
+    opencv_imgproc
+    opencv_calib3d
+    opencv_highgui
+    opencv_features2d
+    opencv_video
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
