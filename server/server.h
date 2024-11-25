@@ -34,5 +34,5 @@ extern bool stopThreads;
 void handle_client(int client_sock);
 void videoCaptureThread(const string& video, queue<Mat>& frameQueue);  // 동영상 캡처 스레드
 void displayFrames(vector<queue<Mat>>& frameQueues, const vector<string>& windowNames); // 프레임 출력
-void videoplay();
+void videoplay(Mat& frame);
 #endif // SERVER_H

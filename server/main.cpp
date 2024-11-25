@@ -22,12 +22,11 @@ int main() {
 
     listen(server_sock, 3);
     cout << "연결을 기다리고 있습니다..." << endl;
-
+    
     c = sizeof(struct sockaddr_in);
     while ((client_sock = accept(server_sock, (struct sockaddr *)&client, (socklen_t*)&c))) {
         thread client_thread(handle_client, client_sock);
         client_thread.detach();  // 클라이언트 요청을 새로운 스레드에서 처리
-        videoplay();
     }
 
     if (client_sock < 0) {

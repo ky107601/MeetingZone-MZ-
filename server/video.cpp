@@ -75,27 +75,51 @@ void displayFrames(vector<queue<Mat>>& frameQueues, const vector<string>& window
     destroyAllWindows();
 }
 
-void videoplay()
-{
-    // 동영상 파일 이름 목록
-    vector<string> videoFiles = {"test1.mp4", "test2.mp4"}; // 동적으로 추가 가능
+// void videoplay(Mat& frame)
+// {
+//     // 동영상 파일 이름 목록
+//     vector<Mat> videoFiles = frame; // 동적으로 추가 가능
+    
+//     vector<string> windowName = {"Live Video"};
 
-    // 스레드와 큐 관리
-    vector<thread> threads;
-    vector<queue<Mat>> frameQueues(videoFiles.size()); // 동영상 파일마다 큐 생성
+//     // 스레드와 큐 관리
+//     vector<thread> threads;
+//     vector<queue<Mat>> frameQueues(videoFiles.size()); // 동영상 파일마다 큐 생성
 
-    // 동영상 파일마다 스레드 생성
-    for (size_t i = 0; i < videoFiles.size(); ++i) {
-        threads.emplace_back(videoCaptureThread, videoFiles[i], ref(frameQueues[i]));
+//     // 동영상 파일마다 스레드 생성
+//     for (size_t i = 0; i < videoFiles.size(); ++i) {
+//         threads.emplace_back(videoCaptureThread, videoFiles[i], ref(frameQueues[i]));
+//     }
+
+//     // 메인 스레드에서 프레임 출력
+//     displayFrames(frameQueues, windowName);
+
+//     // 모든 스레드 종료 대기
+//     for (auto& thread : threads) {
+//         if (thread.joinable()) {
+//             thread.join();
+//         }
+//     }
+// }
+void videoplay(Mat& frame) {
+    // 창 이름 지정
+    string windowName = "Live Video";
+
+    // 창 생성 (최초 1회만 생성)
+    static bool isWindowCreated = false;
+    if (!isWindowCreated) {
+        namedWindow(windowName, WINDOW_NORMAL);
+        moveWindow(windowName, 100, 100);
+        isWindowCreated = true;
     }
 
-    // 메인 스레드에서 프레임 출력
-    displayFrames(frameQueues, videoFiles);
+    // 프레임 출력
+    imshow(windowName, frame);
 
-    // 모든 스레드 종료 대기
-    for (auto& thread : threads) {
-        if (thread.joinable()) {
-            thread.join();
-        }
+    // 'q' 키 입력 시 종료
+    if (waitKey(1) == 'q') {
+        stopThreads = true;
+        destroyAllWindows();
+        exit(0);
     }
 }
