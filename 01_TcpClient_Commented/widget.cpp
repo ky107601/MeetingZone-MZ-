@@ -2,7 +2,7 @@
 #include <QtNetwork>
 #include <QDebug>
 #include <QString>
-
+#include <opencv2/opencv.hpp>
 #include "widget.h"
 #include "ui_widget.h"
 
@@ -41,23 +41,59 @@ void Widget::initClnt()
             this,      SLOT(slot_readMessage()));
 
     // [02.3.3] 서버에서 연결 종료 시그널이 전달되면 slot_disconnected 슬롯 연결
-    connect(tcpSocket, SIGNAL(disconnected()),
-            this,      SLOT(slot_disconnected()));
+
 }
 
 // [02.4]
 //// [2] 연결 : 서버 IP로 연결 요청, Port 는 qint16 자료형
 void Widget::slot_connectButton()
 {
-    // [02.4.1] QLineEdit 에 입력된 Server IP, Server Port를 가져온다.
     QString serverIP = ui->serverIP->text().trimmed();
     QString serverPort = ui->serverPort->text().trimmed();
     QHostAddress serverAddress(serverIP);
 
-    // [02.4.2] 서버로 연결 요청을 보낸다.
     tcpSocket->connectToHost(serverAddress, serverPort.toUShort());
     ui->textEdit->append("<- 서버에게 연결 요청");
+
+    connect(tcpSocket, &QTcpSocket::connected, this, [=]() {
+        QString videoFilePath = "/home/veda/Downloads/01_TcpClient_Commented/test1.mp4";
+
+        // OpenCV로 동영상 파일 열기
+        cv::VideoCapture capture(videoFilePath.toStdString());
+        if (!capture.isOpened()) {
+            ui->textEdit->append("동영상을 열 수 없습니다: " + videoFilePath);
+            return;
+        }
+
+        cv::Mat frame;
+        while (capture.read(frame)) {
+            // 프레임을 JPEG로 인코딩
+            std::vector<uchar> buffer;
+            cv::imencode(".jpg", frame, buffer); // JPG 형식으로 인코딩
+
+            // 프레임 크기를 먼저 전송
+            qint64 frameSize = buffer.size();
+            tcpSocket->write(reinterpret_cast<const char*>(&frameSize), sizeof(frameSize));
+            tcpSocket->waitForBytesWritten();
+
+            // 프레임 데이터를 전송
+            QByteArray frameData(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+            tcpSocket->write(frameData);
+            tcpSocket->waitForBytesWritten();
+
+            ui->textEdit->append("-> 프레임 전송 완료: 크기 = " + QString::number(frameSize));
+
+            // FPS 제어 (30 FPS 기준)
+            QThread::msleep(33);
+        }
+
+        capture.release();
+        ui->textEdit->append("-> 모든 프레임 전송 완료");
+        tcpSocket->disconnectFromHost();
+    });
 }
+
+
 
 // [02.5] 서버에서 전송 받은 데이터를 읽어들인다.
 //// [3] 송수신 : 데이터 송수신
