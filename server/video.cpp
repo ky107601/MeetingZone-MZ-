@@ -1,125 +1,83 @@
 #include "server.h"
 
 mutex queueMutex;
-condition_variable frameAvailable;
-bool stopThreads = false;
+condition_variable frameable;
+atomic<bool> stop = false;
 
-void videoCaptureThread(const string& video, queue<Mat>& frameQueue) {
-    VideoCapture capture(video);
-    if (!capture.isOpened()) {
-        cerr << "동영상을 열 수 없습니다: " << video << endl;
-        return;
-    }
-
-    while (!stopThreads) {
-        Mat frame;
-        if (!capture.read(frame)) {
-            cout << "동영상 재생이 끝났습니다: " << video << endl;
-            break;
-        }
-
-        // 프레임 크기 조정
-        Mat resizedFrame;
-        resize(frame, resizedFrame, Size(320, 240), 0, 0, INTER_CUBIC);
-
-        // 프레임을 큐에 추가
-        {
-            lock_guard<mutex> lock(queueMutex);
+// 각 클라이언트의 프레임 데이터를 수신하여 큐에 추가(데이터 독립 관리)
+void videothread(Mat& frame, queue<Mat>& frameQueue) {
+    while (!stop.load()) {
+        if (!frame.empty()) {
+            Mat resizedFrame;
+            resize(frame, resizedFrame, Size(320, 240), 0, 0, INTER_CUBIC); // 크기 조정     
+            lock_guard<mutex> lock(queueMutex);         
             frameQueue.push(resizedFrame);
+            frameable.notify_one(); // queue에서 데이터 처리
         }
-        frameAvailable.notify_all();
-    }
 
-    capture.release();
+        this_thread::sleep_for(chrono::milliseconds(50)); // 프레임 수신 간격
+    }
 }
 
-void displayFrames(vector<queue<Mat>>& frameQueues, const vector<string>& windowNames) {
-    // 창 위치 계산
-    int base_x = 100, base_y = 100, offset_x = 100;
-
-    // 창 생성 및 위치 지정
-    for (size_t i = 0; i < windowNames.size(); ++i) {
-        namedWindow(windowNames[i], WINDOW_NORMAL);
-        moveWindow(windowNames[i], base_x + i * offset_x, base_y);
+void display_all_client(map<string, queue<Mat>>& frameQueues) {
+    // 윈도우 생성
+    for (const auto& [ip, frameQueue] : frameQueues) {
+        namedWindow(ip, WINDOW_NORMAL);
     }
 
-    while (!stopThreads) {
-        vector<Mat> frames(windowNames.size());
-
-        // 각 큐에서 프레임 가져오기
-        for (size_t i = 0; i < frameQueues.size(); ++i) {
-            unique_lock<mutex> lock(queueMutex);
-            frameAvailable.wait(lock, [&frameQueues, i] { return !frameQueues[i].empty() || stopThreads; });
-
-            if (!frameQueues[i].empty()) {
-                frames[i] = frameQueues[i].front();
-                frameQueues[i].pop();
+    while (!stop.load()) {
+        for (auto& [ip, frameQueue] : frameQueues) {
+            Mat frame;
+            // 각 클라이언트의 프레임 큐에서 데이터 가져오기
+            {
+                lock_guard<mutex> lock(queueMutex);
+                if (!frameQueue.empty()) {
+                    frame = frameQueue.front();
+                    frameQueue.pop();
+                }
             }
-        }
-
-        // 각 창에 프레임 출력
-        for (size_t i = 0; i < frames.size(); ++i) {
-            if (!frames[i].empty()) {
-                imshow(windowNames[i], frames[i]);
+            
+            // 가져온 프레임 출력
+            if (!frame.empty()) {
+                imshow(ip, frame); // imshow로 출력
             }
         }
 
         // 'q' 키 입력 시 종료
         if (waitKey(1) == 'q') {
-            stopThreads = true;
-            frameAvailable.notify_all();
+            stop.store(true);
+            frameable.notify_all();
             break;
         }
     }
 
-    destroyAllWindows();
+    // 윈도우 종료
+    for (const auto& [ip, frameQueue] : frameQueues) {
+        destroyWindow(ip);
+    }
 }
 
-// void videoplay(Mat& frame)
-// {
-//     // 동영상 파일 이름 목록
-//     vector<Mat> videoFiles = frame; // 동적으로 추가 가능
-    
-//     vector<string> windowName = {"Live Video"};
+// 모든 클라이언트의 영상을 수신 및 출력
+void videoallplay(Mat& frame, const string& ip) {
+    // 클라이언트별 프레임 큐 및 스레드 관리
+    static map<string, queue<Mat>> frameQueues; // IP별 프레임 큐
+    static vector<thread> threads;
 
-//     // 스레드와 큐 관리
-//     vector<thread> threads;
-//     vector<queue<Mat>> frameQueues(videoFiles.size()); // 동영상 파일마다 큐 생성
+    // 클라이언트의 프레임 큐가 없으면 추가
+    if (frameQueues.find(ip) == frameQueues.end()) {
+        frameQueues[ip] = queue<Mat>(); // 새로운 큐 생성
 
-//     // 동영상 파일마다 스레드 생성
-//     for (size_t i = 0; i < videoFiles.size(); ++i) {
-//         threads.emplace_back(videoCaptureThread, videoFiles[i], ref(frameQueues[i]));
-//     }
-
-//     // 메인 스레드에서 프레임 출력
-//     displayFrames(frameQueues, windowName);
-
-//     // 모든 스레드 종료 대기
-//     for (auto& thread : threads) {
-//         if (thread.joinable()) {
-//             thread.join();
-//         }
-//     }
-// }
-void videoplay(Mat& frame) {
-    // 창 이름 지정
-    string windowName = "Live Video";
-
-    // 창 생성 (최초 1회만 생성)
-    static bool isWindowCreated = false;
-    if (!isWindowCreated) {
-        namedWindow(windowName, WINDOW_NORMAL);
-        moveWindow(windowName, 100, 100);
-        isWindowCreated = true;
+        // 데이터 수신 스레드 시작
+        threads.emplace_back(videothread, ref(frame), ref(frameQueues[ip]));
     }
 
-    // 프레임 출력
-    imshow(windowName, frame);
+    // 메인 스레드에서 디스플레이 처리
+    display_all_client(frameQueues);
 
-    // 'q' 키 입력 시 종료
-    if (waitKey(1) == 'q') {
-        stopThreads = true;
-        destroyAllWindows();
-        exit(0);
+    // 스레드 종료 대기
+    for (auto& thread : threads) {
+        if (thread.joinable()) {
+            thread.join();
+        }
     }
 }

@@ -17,6 +17,7 @@
 #include <memory>
 #include <opencv2/opencv.hpp>
 #include <queue>
+#include <atomic>
 #include <condition_variable>
 #include "nlohmann/json.hpp"
 
@@ -27,12 +28,12 @@ using namespace cv;
 
 // 전역 변수
 extern mutex queueMutex;                     // 큐 접근 보호를 위한 뮤텍스
-extern condition_variable frameAvailable;    // 프레임 추가 알림
-extern bool stopThreads;     
+extern condition_variable frameable;    // 프레임 추가 알림
+extern atomic<bool> stop;
 
 // 함수 선언
-void handle_client(int client_sock);
-void videoCaptureThread(const string& video, queue<Mat>& frameQueue);  // 동영상 캡처 스레드
-void displayFrames(vector<queue<Mat>>& frameQueues, const vector<string>& windowNames); // 프레임 출력
-void videoplay(Mat& frame);
+void handle_client(int client_sock, const std::string& ip);
+void videothread(Mat& frame, queue<Mat>& frameQueue);
+void display_all_client(map<string, queue<Mat>>& frameQueues);
+void videoallplay(Mat& frame, const string& ip) ;
 #endif // SERVER_H
