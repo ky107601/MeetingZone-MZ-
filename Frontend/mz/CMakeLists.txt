@@ -13,59 +13,59 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${CMAKE_SOURCE_DIR}/include/ffmpeg)  # Include FFmpeg headers
 link_directories(${CMAKE_SOURCE_DIR}/lib)               # Link FFmpeg static libraries
 
+# Find Qt and OpenCV packages
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(OpenCV REQUIRED)
-include_directories(/usr/include/opencv4)
 
+# Include OpenCV headers
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(PROJECT_SOURCES
-        main.cpp
-        widget.cpp
-        widget.h
-        widget.ui
+    main.cpp
+    widget.cpp
+    widget.h
+    widget.ui
+    camviewer.h
+    camviewer.cpp
+    backgroundpicture.h
+    backgroundpicture.cpp
 )
 
+# Define the executable
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(mz
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         image.qrc
-        camviewer.h
-        camviewer.cpp
-        backgroundpicture.h
-        backgroundpicture.cpp
-
     )
 else()
     if(ANDROID)
-        add_library(mz SHARED
-            ${PROJECT_SOURCES}
-        )
+        add_library(mz SHARED ${PROJECT_SOURCES})
     else()
-        add_executable(mz
-            ${PROJECT_SOURCES}
-        )
+        add_executable(mz ${PROJECT_SOURCES})
     endif()
 endif()
 
-# Link FFmpeg libraries and Qt Widgets
+# Link FFmpeg, Qt Widgets, and OpenCV libraries
 target_link_libraries(mz
     PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
-    avcodec
+    ${OpenCV_LIBS}            # Link OpenCV libraries
+    avcodec                   # FFmpeg libraries
     avformat
     avutil
     swresample
     swscale
-    pthread  # FFmpeg often requires pthread
-    m        # Math library
+    pthread                   # Required for FFmpeg and OpenCV
+    m                         # Math library
 )
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
+# Set macOS-specific properties (if applicable)
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.mz)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.mz)
 endif()
+
 set_target_properties(mz PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
