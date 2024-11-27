@@ -9,35 +9,37 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add OpenCV include directory and library directory
-include_directories(${CMAKE_SOURCE_DIR}/opencv-install/include/opencv4)  # Include OpenCV headers
-link_directories(${CMAKE_SOURCE_DIR}/opencv-install/lib)               # Link OpenCV static libraries
-
 # Add FFmpeg include directory and library directory
 include_directories(${CMAKE_SOURCE_DIR}/include/ffmpeg)  # Include FFmpeg headers
 link_directories(${CMAKE_SOURCE_DIR}/lib)               # Link FFmpeg static libraries
 
+# Find Qt and OpenCV packages
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(OpenCV REQUIRED)
+
+# Add OpenCV include directories
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(PROJECT_SOURCES
-        main.cpp
-        widget.cpp
-        widget.h
-        widget.ui
+    main.cpp
+    widget.cpp
+    widget.h
+    widget.ui
+    camerastreamer.h
+    camerastreamer.cpp
+    camviewer.h
+    camviewer.cpp
+    backgroundpicture.h
+    backgroundpicture.cpp
 )
 
+# Create the mz executable
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(mz
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         image.qrc
-        camerastreamer.h
-        camerastreamer.cpp
-        camviewer.h
-        camviewer.cpp
-        backgroundpicture.h
-        backgroundpicture.cpp
     )
 else()
     if(ANDROID)
@@ -51,44 +53,34 @@ else()
     endif()
 endif()
 
-# Link FFmpeg libraries, Qt Widgets, and OpenCV libraries
+# Link the required libraries to the mz target
 target_link_libraries(mz
     PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    ${OpenCV_LIBS}            # OpenCV libraries
     avcodec
     avformat
     avutil
     swresample
     swscale
-    pthread  # FFmpeg often requires pthread
-    m        # Math library
-    opencv_core
-    opencv_imgproc
-    opencv_calib3d
-    opencv_highgui
-    opencv_features2d
-    opencv_video
+    pthread                  # FFmpeg often requires pthread
+    m                        # Math library
 )
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.mz)
-endif()
+# Additional properties for macOS and Windows
 set_target_properties(mz PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 
-include(GNUInstallDirs)
+# Install rules
 install(TARGETS mz
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+# Finalize for Qt6
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(mz)
 endif()
