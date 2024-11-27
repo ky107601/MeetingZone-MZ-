@@ -37,5 +37,4 @@ void videothread(Mat& frame, queue<Mat>& frameQueue);
 void display_all_client(map<string, queue<Mat>>& frameQueues);
 void videoallplay(Mat& frame, const string& ip);
 Mat mergeFrames(map<string, queue<Mat>>& frameQueues);
-void servtocli(map<string, int>& client, map<string, queue<Mat>>& frameQueues);
 #endif // SERVER_H
