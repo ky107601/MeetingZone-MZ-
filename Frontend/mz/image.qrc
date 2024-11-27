@@ -14,5 +14,6 @@
         <file>resources/change.png</file>
         <file>resources/penguin.png</file>
         <file>resources/plus.png</file>
+        <file>resources/kaonashi.jpg</file>
     </qresource>
 </RCC>

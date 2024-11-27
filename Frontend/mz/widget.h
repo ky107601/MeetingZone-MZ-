@@ -11,9 +11,16 @@
 #include <QPixmap>
 #include <QTimer>
 #include <QEvent>
+#include <QString>
 #include <QHBoxLayout>
-#include "camerastreamer.h"
 #include "camviewer.h"
+#include "backgroundpicture.h"
+#include <libavcodec/ac3_parser.h>
+
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QPixmap>
+#include <QFileDialog>
 
 using namespace cv;
 using namespace std;
@@ -46,15 +53,18 @@ public:
     camViewer *cam; //QLabel
     string width, height;
 
+    backgroundPicture picture;
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+
 public slots:
     void changeIcon();
     void updateFrame();
+    void selectPicture();
 
 private:
     Ui::Widget *ui;
-
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
 };
 #endif // WIDGET_H

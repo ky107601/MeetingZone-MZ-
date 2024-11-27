@@ -18,7 +18,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(OpenCV REQUIRED)
 
-# Add OpenCV include directories
+# Include OpenCV headers
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(PROJECT_SOURCES
@@ -26,15 +26,13 @@ set(PROJECT_SOURCES
     widget.cpp
     widget.h
     widget.ui
-    camerastreamer.h
-    camerastreamer.cpp
     camviewer.h
     camviewer.cpp
     backgroundpicture.h
     backgroundpicture.cpp
 )
 
-# Create the mz executable
+# Define the executable
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(mz
         MANUAL_FINALIZATION
@@ -43,31 +41,31 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     )
 else()
     if(ANDROID)
-        add_library(mz SHARED
-            ${PROJECT_SOURCES}
-        )
+        add_library(mz SHARED ${PROJECT_SOURCES})
     else()
-        add_executable(mz
-            ${PROJECT_SOURCES}
-        )
+        add_executable(mz ${PROJECT_SOURCES})
     endif()
 endif()
 
-# Link the required libraries to the mz target
+# Link FFmpeg, Qt Widgets, and OpenCV libraries
 target_link_libraries(mz
     PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
-    ${OpenCV_LIBS}            # OpenCV libraries
-    avcodec
+    ${OpenCV_LIBS}            # Link OpenCV libraries
+    avcodec                   # FFmpeg libraries
     avformat
     avutil
     swresample
     swscale
-    pthread                  # FFmpeg often requires pthread
-    m                        # Math library
+    pthread                   # Required for FFmpeg and OpenCV
+    m                         # Math library
 )
 
-# Additional properties for macOS and Windows
+# Set macOS-specific properties (if applicable)
+if(${QT_VERSION} VERSION_LESS 6.1.0)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.mz)
+endif()
+
 set_target_properties(mz PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
