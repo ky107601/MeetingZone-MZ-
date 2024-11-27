@@ -3,41 +3,31 @@
 
 #include <QWidget>
 #include <QTcpSocket>
+#include <opencv2/opencv.hpp>
 
-namespace Ui {
-class Widget;
-}
+QT_BEGIN_NAMESPACE
+namespace Ui { class Widget; }
+QT_END_NAMESPACE
 
 class Widget : public QWidget
 {
     Q_OBJECT
 
 public:
-
-    // [02.1]
-    explicit Widget(QWidget *parent = nullptr);
+    Widget(QWidget *parent = nullptr);
     ~Widget();
-
-    // [02.7]
     QHostAddress getMyIP();
-
 private:
     Ui::Widget *ui;
-
-    // [02.3]
-    void initClnt();
     QTcpSocket *tcpSocket;
 
+    void initClnt();
+
 private slots:
-
-    // [02.4]
     void slot_connectButton();
-
-    // [02.5]
-    void slot_readMessage(); // 서버로부터 메세지를 받을 때 호출 됨
-
-    // [02.6]
+    void slot_readMessage();
     void slot_disconnected();
+
 };
 
 #endif // WIDGET_H
