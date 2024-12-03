@@ -20,10 +20,40 @@ LIBS = -lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lavform
 TARGET = client
 SRC = client.cpp
 
-.PHONY: all install install_rpi install_ubuntu run run_rpi run_ubuntu clean detect build build_clean
+.PHONY: all install install_rpi install_ubuntu run run_rpi run_ubuntu clean detect build build_clean update_config check_certs
 
 # Default target
 all: install run build
+
+# Update specific values of YAML file
+YAML_FILE = mediamtx.yml
+PROTOCOLS_KEY = protocols
+PROTOCOLS_VALUE = [tcp]
+ENCRYPTION_KEY = encryption
+ENCRYPTION_VALUE = "optional"
+
+update_config:
+	@echo "Updating $(PROTOCOLS_KEY) to $(PROTOCOLS_VALUE) in $(YAML_FILE)..."
+	sed -i 's/\($(PROTOCOLS_KEY):\).*/\1 $(PROTOCOLS_VALUE)/' $(YAML_FILE)
+	@echo "Updating $(ENCRYPTION_KEY) to $(ENCRYPTION_VALUE) in $(YAML_FILE)..."
+	sed -i 's/\($(ENCRYPTION_KEY):\).*/\1 $(ENCRYPTION_VALUE)/' $(YAML_FILE)
+	@echo "Update completed."
+
+# Create key and cert file
+KEY_FILE = server.key
+CRT_FILE = server.crt
+
+check_certs: $(KEY_FILE) $(CRT_FILE)
+
+$(KEY_FILE):
+	@echo "Generating $(KEY_FILE)..."
+	openssl genrsa -out $(KEY_FILE) 2048
+	@echo "$(KEY_FILE) generated."
+
+$(CRT_FILE): $(KEY_FILE)
+	@echo "Generating $(CRT_FILE)..."
+	openssl req -new -x509 -sha256 -key $(KEY_FILE) -out $(CRT_FILE) -days 3650
+	@echo "$(CRT_FILE) generated."
 
 # Install MediaMTX for Raspberry Pi
 install_rpi:
@@ -52,6 +82,8 @@ install:
 	else \
 		echo "Unsupported OS: $(UNAME_S)"; exit 1; \
 	fi
+	$(MAKE) update_config;
+	$(MAKE) check_certs;
 
 # # Run MediaMTX for Raspberry Pi
 # run_rpi:
