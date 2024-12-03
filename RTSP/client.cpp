@@ -266,7 +266,7 @@ void rtsp_streaming(const std::string& rtsp_url) {
 }
 
 int main() {
-    const std::string rtsp_url = "rtsp://" + get_ip_addr() + ":8554/camera";
+    const std::string rtsp_url = "rtsps://" + get_ip_addr() + ":8322/camera";
 
     // Register signal handler to clean up resources
     std::signal(SIGINT, [](int) {
