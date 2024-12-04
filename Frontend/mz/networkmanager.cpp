@@ -247,26 +247,27 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     std::cout << "RTSP streaming stopped." << std::endl;
 }
 
-int NetworkManager::test_main() {
-    const std::string rtsp_url = "rtsps://" + get_ip_addr() + ":8322/camera";
+int test_main() {
+    NetworkManager& networkManager = NetworkManager::getInstance();
+    const std::string rtsp_url = "rtsps://" + networkManager.get_ip_addr() + ":8322/camera";
 
     // Register signal handler to clean up resources
     std::signal(SIGINT, [](int) {
-        stopMediaMTX();
+        NetworkManager::getInstance().stopMediaMTX();
         exit(EXIT_SUCCESS);
     });
 
     // Start MediaMTX server
-    startMediaMTX();
+    networkManager.startMediaMTX();
 
     // Start RTSP streaming in a separate thread
-    std::thread streaming_thread(rtsp_streaming, rtsp_url);
+    std::thread streaming_thread(&NetworkManager::rtsp_streaming, &networkManager, rtsp_url);
 
     // Wait for the streaming thread to complete
     streaming_thread.join();
 
     // Stop MediaMTX server before exiting
-    stopMediaMTX();
+    networkManager.stopMediaMTX();
 
     return 0;
 }

@@ -57,12 +57,9 @@ public:
     // Function for RTSP Streaming
     void rtsp_streaming(const std::string& rtsp_url);
 
-    // original main code
-    int test_main();
-
-
 };
 
-
+// original main code
+int test_main();
 
 #endif // NETWORKMANAGER_H
