@@ -1,6 +1,7 @@
 #include "networkmanager.h"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Function to set IP Address
 void NetworkManager::set_ip_addr(std::string new_addr) {
     ip_address = new_addr;
@@ -48,6 +49,10 @@ void NetworkManager::startMediaMTX() {
     // Wait for the server to initialize (optional, adjust timing) | 서버 초기화 대기
 =======
 std::string get_ip_addr(){
+=======
+// Funciton to get IP Address
+std::string NetworkManager::get_ip_addr(){
+>>>>>>> 6ab4677 (refactoring)
     struct ifaddrs *ifap = nullptr;
     struct ifaddrs *i = nullptr;
     void *src;
@@ -78,7 +83,7 @@ std::string get_ip_addr(){
 }
 
 // Function to start MediaMTX server
-void startMediaMTX() {
+void NetworkManager::startMediaMTX() {
     std::cout << "Starting MediaMTX server..." << std::endl;
 
     // Command to start MediaMTX (adjust path as needed)
@@ -96,10 +101,14 @@ void startMediaMTX() {
 
 // Function to stop MediaMTX server
 <<<<<<< HEAD
+<<<<<<< HEAD
 void NetworkManager::stopMediaMTX() {
 =======
 void stopMediaMTX() {
 >>>>>>> 8b7862b (static -> dtnamic)
+=======
+void NetworkManager::stopMediaMTX() {
+>>>>>>> 6ab4677 (refactoring)
     std::cout << "Stopping MediaMTX server..." << std::endl;
 
     // Kill the MediaMTX process (use pkill or PID tracking)
@@ -111,6 +120,7 @@ void stopMediaMTX() {
     }
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 void NetworkManager::configCodecParam() {
     codec_ctx->codec_id = AV_CODEC_ID_H264;              // 코덱 ID를 H.264로 설정
@@ -133,6 +143,30 @@ void NetworkManager::setFrame() {
 }
 
 void NetworkManager::freeAllAV() {
+=======
+void NetworkManager::configCodecParam(AVCodecContext* codec_ctx) {
+    codec_ctx->codec_id = AV_CODEC_ID_H264;
+    codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;
+    codec_ctx->bit_rate = 400000;
+    codec_ctx->width = 640;
+    codec_ctx->height = 480;
+    codec_ctx->time_base = AVRational{1, 25};
+    codec_ctx->gop_size = 10;
+    codec_ctx->max_b_frames = 1;
+    codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+    return;
+}
+
+void NetworkManager::setFrame(AVFrame* frame, AVCodecContext* codec_ctx) {
+    frame->format = codec_ctx->pix_fmt;
+    frame->width = codec_ctx->width;
+    frame->height = codec_ctx->height;
+    return;
+}
+
+void NetworkManager::freeAllAV(AVFormatContext *output_ctx, 
+    AVFrame* frame, uint8_t *buffer, AVCodecContext *codec_ctx) {
+>>>>>>> 6ab4677 (refactoring)
     avformat_free_context(output_ctx);
     av_frame_free(&frame);
     av_free(buffer);
@@ -140,6 +174,7 @@ void NetworkManager::freeAllAV() {
     return;
 }
 
+<<<<<<< HEAD
 void NetworkManager::openCamera() {
     // OpenCV camera capture
     std::string pipeline =
@@ -263,6 +298,9 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
     // Video codec
 =======
 void rtsp_streaming(const std::string& rtsp_url) {
+=======
+void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
+>>>>>>> 6ab4677 (refactoring)
     // Initialize FFmpeg
     avformat_network_init();
 
@@ -291,6 +329,7 @@ void rtsp_streaming(const std::string& rtsp_url) {
 
     // Configure codec parameters
 <<<<<<< HEAD
+<<<<<<< HEAD
     configCodecParam();
 =======
     codec_ctx->codec_id = AV_CODEC_ID_H264;
@@ -304,6 +343,10 @@ void rtsp_streaming(const std::string& rtsp_url) {
     codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
 >>>>>>> 8b7862b (static -> dtnamic)
 
+=======
+    configCodecParam(codec_ctx);
+    
+>>>>>>> 6ab4677 (refactoring)
     if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
         std::cerr << "Failed to open codec!" << std::endl;
         avcodec_free_context(&codec_ctx);
@@ -322,6 +365,7 @@ void rtsp_streaming(const std::string& rtsp_url) {
         return;
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     setFrame();
 
     int buffer_size = av_image_get_buffer_size(codec_ctx->pix_fmt, codec_ctx->width, codec_ctx->height, 1);
@@ -330,6 +374,9 @@ void rtsp_streaming(const std::string& rtsp_url) {
     frame->format = codec_ctx->pix_fmt;
     frame->width = codec_ctx->width;
     frame->height = codec_ctx->height;
+=======
+    setFrame(frame, codec_ctx);
+>>>>>>> 6ab4677 (refactoring)
 
     int buffer_size = av_image_get_buffer_size(codec_ctx->pix_fmt, codec_ctx->width, codec_ctx->height, 1);
     uint8_t* buffer = (uint8_t*)av_malloc(buffer_size);
@@ -349,18 +396,6 @@ void rtsp_streaming(const std::string& rtsp_url) {
     if (!video_stream) {
         std::cerr << "Failed to create video stream!" << std::endl;
 <<<<<<< HEAD
-        freeAllAV();
-=======
-        avformat_free_context(output_ctx);
-        av_frame_free(&frame);
-        av_free(buffer);
-        avcodec_free_context(&codec_ctx);
->>>>>>> 8b7862b (static -> dtnamic)
-        return;
-    }
-
-    if (avcodec_parameters_from_context(video_stream->codecpar, codec_ctx) < 0) {
-        std::cerr << "Failed to copy codec parameters!" << std::endl;
 <<<<<<< HEAD
         freeAllAV();
 =======
@@ -369,6 +404,26 @@ void rtsp_streaming(const std::string& rtsp_url) {
         av_free(buffer);
         avcodec_free_context(&codec_ctx);
 >>>>>>> 8b7862b (static -> dtnamic)
+=======
+        freeAllAV(output_ctx, frame, buffer, codec_ctx);
+>>>>>>> 6ab4677 (refactoring)
+        return;
+    }
+
+    if (avcodec_parameters_from_context(video_stream->codecpar, codec_ctx) < 0) {
+        std::cerr << "Failed to copy codec parameters!" << std::endl;
+<<<<<<< HEAD
+<<<<<<< HEAD
+        freeAllAV();
+=======
+        avformat_free_context(output_ctx);
+        av_frame_free(&frame);
+        av_free(buffer);
+        avcodec_free_context(&codec_ctx);
+>>>>>>> 8b7862b (static -> dtnamic)
+=======
+        freeAllAV(output_ctx, frame, buffer, codec_ctx);
+>>>>>>> 6ab4677 (refactoring)
         return;
     }
 
@@ -378,6 +433,7 @@ void rtsp_streaming(const std::string& rtsp_url) {
         if (avio_open(&output_ctx->pb, rtsp_url.c_str(), AVIO_FLAG_WRITE) < 0) {
             std::cerr << "Failed to open RTSP output!" << std::endl;
 <<<<<<< HEAD
+<<<<<<< HEAD
             freeAllAV();
 =======
             avformat_free_context(output_ctx);
@@ -385,12 +441,16 @@ void rtsp_streaming(const std::string& rtsp_url) {
             av_free(buffer);
             avcodec_free_context(&codec_ctx);
 >>>>>>> 8b7862b (static -> dtnamic)
+=======
+            freeAllAV(output_ctx, frame, buffer, codec_ctx);
+>>>>>>> 6ab4677 (refactoring)
             return;
         }
     }
 
     if (avformat_write_header(output_ctx, nullptr) < 0) {
         std::cerr << "Failed to write RTSP header!" << std::endl;
+<<<<<<< HEAD
 <<<<<<< HEAD
         freeAllAV();
         return;
@@ -402,6 +462,9 @@ void rtsp_streaming(const std::string& rtsp_url) {
         av_frame_free(&frame);
         av_free(buffer);
         avcodec_free_context(&codec_ctx);
+=======
+        freeAllAV(output_ctx, frame, buffer, codec_ctx);
+>>>>>>> 6ab4677 (refactoring)
         return;
     }
 
@@ -412,10 +475,7 @@ void rtsp_streaming(const std::string& rtsp_url) {
     ! video/x-raw,width=640,height=480,framerate=25/1,format=BGR ! appsink", cv::CAP_GSTREAMER);  // Adjust the camera index as needed
     if (!cap.isOpened()) {
         std::cerr << "Failed to open camera!" << std::endl;
-        avformat_free_context(output_ctx);
-        av_frame_free(&frame);
-        av_free(buffer);
-        avcodec_free_context(&codec_ctx);
+        freeAllAV(output_ctx, frame, buffer, codec_ctx);
         return;
     }
 
@@ -488,12 +548,10 @@ void NetworkManager::stopRTSP() {
 
         av_packet_free(&pkt);
     }
+    
     // Cleanup
     av_write_trailer(output_ctx);
-    avcodec_free_context(&codec_ctx);
-    avformat_free_context(output_ctx);
-    av_frame_free(&frame);
-    av_free(buffer);
+    freeAllAV(output_ctx, frame, buffer, codec_ctx);
     sws_freeContext(sws_ctx);
     cap.release();
 >>>>>>> 8b7862b (static -> dtnamic)
@@ -501,6 +559,7 @@ void NetworkManager::stopRTSP() {
     std::cout << "RTSP streaming stopped." << std::endl;
 }
 
+<<<<<<< HEAD
 int test_main() {
 <<<<<<< HEAD
     NetworkManager& networkManager = NetworkManager::getInstance();
@@ -512,6 +571,9 @@ int test_main() {
         NetworkManager::getInstance().stopRTSP();
         NetworkManager::getInstance().stopMediaMTX();
 =======
+=======
+int NetworkManager::test_main() {
+>>>>>>> 6ab4677 (refactoring)
     const std::string rtsp_url = "rtsps://" + get_ip_addr() + ":8322/camera";
 
     // Register signal handler to clean up resources

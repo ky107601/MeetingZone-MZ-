@@ -105,4 +105,46 @@ extern "C" {
     #include <libswscale/swscale.h>
     #include <libavutil/time.h>
 }
+
+class NetworkManager {
+private:
+    // Singleton
+    NetworkManager() = default;
+    ~NetworkManager() = default;
+    NetworkManager(const NetworkManager&) = delete;
+    NetworkManager& operator=(const NetworkManager&) = delete;
+
+    // Inner Functions
+    void configCodecParam(AVCodecContext* codec_ctx);
+    void setFrame(AVFrame* frame, AVCodecContext* codec_ctx);
+    void freeAllAV(AVFormatContext *output_ctx, AVFrame* frame, 
+        uint8_t *buffer, AVCodecContext *codec_ctx);
+
+public:
+    // Singleton GetInstance()
+    static NetworkManager& getInstance() {
+        static NetworkManager instance;
+        return instance;
+    }
+
+    // Funciton to get IP Address
+    std::string get_ip_addr();
+
+    // Function to start MediaMTX server
+    void startMediaMTX();
+
+    // Function to stop MediaMTX server
+    void stopMediaMTX();
+
+    // Function for RTSP Streaming
+    void rtsp_streaming(const std::string& rtsp_url);
+
+    // original main code
+    int test_main();
+
+
+};
+
+
+
 #endif // NETWORKMANAGER_H
