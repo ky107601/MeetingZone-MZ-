@@ -9,12 +9,26 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+<<<<<<< HEAD
 # OpenCV & FFmpeg 라이브러리 경로 추가
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
 # OpenCV & FFmpeg 헤더 경로 추가
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include/opencv4)
+=======
+# Add FFmpeg include directory and library directory
+# include_directories(${CMAKE_SOURCE_DIR}/include/ffmpeg)  # Include FFmpeg headers
+# link_directories(${CMAKE_SOURCE_DIR}/lib)               # Link FFmpeg static libraries
+
+# dynamic library of ffmpeg
+# FFmpeg 라이브러리 경로 추가
+link_directories(${CMAKE_SOURCE_DIR}/lib)
+
+# FFmpeg 헤더 경로 추가
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+>>>>>>> 8b7862b (static -> dtnamic)
 
 # Find Qt and OpenCV packages
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network Concurrent)
@@ -53,6 +67,7 @@ target_link_libraries(mz
     PRIVATE
     # Qt
     Qt${QT_VERSION_MAJOR}::Widgets
+<<<<<<< HEAD
 
     # OpenCV
     opencv_core
@@ -64,15 +79,21 @@ target_link_libraries(mz
 
     # ffmpeg
     iconv
+=======
+    ${OpenCV_LIBS}            # Link OpenCV libraries
+>>>>>>> 8b7862b (static -> dtnamic)
     avcodec       # libavcodec.so
     avformat      # libavformat.so
     avutil        # libavutil.so
     avdevice      # libavdevice.so
     swresample    # libswresample.so
     swscale       # libswscale.so
+<<<<<<< HEAD
     x264     
 
     # etc.
+=======
+>>>>>>> 8b7862b (static -> dtnamic)
     pthread                   # Required for FFmpeg and OpenCV
     m                         # Math library
 
