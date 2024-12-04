@@ -560,6 +560,7 @@ void NetworkManager::stopRTSP() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 int test_main() {
 <<<<<<< HEAD
     NetworkManager& networkManager = NetworkManager::getInstance();
@@ -580,10 +581,20 @@ int NetworkManager::test_main() {
     std::signal(SIGINT, [](int) {
         stopMediaMTX();
 >>>>>>> 8b7862b (static -> dtnamic)
+=======
+int test_main() {
+    NetworkManager& networkManager = NetworkManager::getInstance();
+    const std::string rtsp_url = "rtsps://" + networkManager.get_ip_addr() + ":8322/camera";
+
+    // Register signal handler to clean up resources
+    std::signal(SIGINT, [](int) {
+        NetworkManager::getInstance().stopMediaMTX();
+>>>>>>> d4a3a58 (choi jeok hwa)
         exit(EXIT_SUCCESS);
     });
 
     // Start MediaMTX server
+<<<<<<< HEAD
 <<<<<<< HEAD
     networkManager.startMediaMTX();
 
@@ -595,6 +606,12 @@ int NetworkManager::test_main() {
     // Start RTSP streaming in a separate thread
     std::thread streaming_thread(rtsp_streaming, rtsp_url);
 >>>>>>> 8b7862b (static -> dtnamic)
+=======
+    networkManager.startMediaMTX();
+
+    // Start RTSP streaming in a separate thread
+    std::thread streaming_thread(&NetworkManager::rtsp_streaming, &networkManager, rtsp_url);
+>>>>>>> d4a3a58 (choi jeok hwa)
 
     // Wait for the streaming thread to complete
     streaming_thread.join();
@@ -604,8 +621,12 @@ int NetworkManager::test_main() {
     networkManager.stopMediaMTX();
 =======
     // Stop MediaMTX server before exiting
+<<<<<<< HEAD
     stopMediaMTX();
 >>>>>>> 8b7862b (static -> dtnamic)
+=======
+    networkManager.stopMediaMTX();
+>>>>>>> d4a3a58 (choi jeok hwa)
 
     return 0;
 }
