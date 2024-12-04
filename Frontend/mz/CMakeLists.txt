@@ -10,8 +10,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add FFmpeg include directory and library directory
-include_directories(${CMAKE_SOURCE_DIR}/include/ffmpeg)  # Include FFmpeg headers
-link_directories(${CMAKE_SOURCE_DIR}/lib)               # Link FFmpeg static libraries
+# include_directories(${CMAKE_SOURCE_DIR}/include/ffmpeg)  # Include FFmpeg headers
+# link_directories(${CMAKE_SOURCE_DIR}/lib)               # Link FFmpeg static libraries
+
+# dynamic library of ffmpeg
+# FFmpeg 라이브러리 경로 추가
+link_directories(${CMAKE_SOURCE_DIR}/lib)
+
+# FFmpeg 헤더 경로 추가
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
 
 # Find Qt and OpenCV packages
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
@@ -30,6 +38,8 @@ set(PROJECT_SOURCES
     camviewer.cpp
     backgroundpicture.h
     backgroundpicture.cpp
+    networkmanager.h
+    networkmanager.cpp
 )
 
 # Define the executable
@@ -47,16 +57,16 @@ else()
     endif()
 endif()
 
-# Link FFmpeg, Qt Widgets, and OpenCV libraries
 target_link_libraries(mz
     PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     ${OpenCV_LIBS}            # Link OpenCV libraries
-    avcodec                   # FFmpeg libraries
-    avformat
-    avutil
-    swresample
-    swscale
+    avcodec       # libavcodec.so
+    avformat      # libavformat.so
+    avutil        # libavutil.so
+    avdevice      # libavdevice.so
+    swresample    # libswresample.so
+    swscale       # libswscale.so
     pthread                   # Required for FFmpeg and OpenCV
     m                         # Math library
 )
@@ -70,6 +80,9 @@ set_target_properties(mz PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 
 # Install rules
 install(TARGETS mz
