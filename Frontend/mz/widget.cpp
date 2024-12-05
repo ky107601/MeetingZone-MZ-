@@ -189,8 +189,12 @@ void Widget::startStreaming() {
 =======
 
     /* ========== NetworkManager ========== */
+<<<<<<< HEAD
     networkManager = NetworkManager::getInstance();
 >>>>>>> ba0bac2 (add NM in widget)
+=======
+    NetworkManager& networkManager = NetworkManager::getInstance();
+>>>>>>> 61c7ffa (widget update)
     // Register signal handler to clean up resources
     std::signal(SIGINT, [](int) {
         NetworkManager::getInstance().stopMediaMTX();
@@ -365,7 +369,7 @@ Mat& Widget::captureNewFrame() {
 Widget::~Widget()
 {
     // Stop MediaMTX server before exiting
-    networkManager.stopMediaMTX();
+    NetworkManager::getInstance().stopMediaMTX();
     delete ui;
 >>>>>>> ba0bac2 (add NM in widget)
 }
