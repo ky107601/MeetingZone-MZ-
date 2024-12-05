@@ -15,6 +15,27 @@ Widget::Widget(QWidget *parent)
     //this->showMaximized(); //full-size
 
 
+
+    /* ========== NetworkManager ========== */
+    networkManager = NetworkManager::getInstance();
+    // Register signal handler to clean up resources
+    std::signal(SIGINT, [](int) {
+        NetworkManager::getInstance().stopMediaMTX();
+        exit(EXIT_SUCCESS);
+    });
+
+    // Start MediaMTX server
+    networkManager.startMediaMTX();
+
+    // Start RTSP streaming in a separate thread
+    std::thread streaming_thread(&NetworkManager::rtsp_streaming, &networkManager, rtsp_url);
+
+    // Wait for the streaming thread to complete
+    streaming_thread.join();
+    /* ==================================== */
+
+
+
     /* Set the inputBox style */
     QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect();
     shadowEffect->setBlurRadius(5);         // Set blur radius for the shadow
@@ -108,6 +129,8 @@ Widget::Widget(QWidget *parent)
 
 Widget::~Widget()
 {
+    // Stop MediaMTX server before exiting
+    networkManager.stopMediaMTX();
     delete ui;
 }
 
