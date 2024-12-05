@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # OpenCV & FFmpeg 라이브러리 경로 추가
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
@@ -23,16 +24,27 @@ include_directories(${CMAKE_SOURCE_DIR}/include/opencv4)
 
 # dynamic library of ffmpeg
 # FFmpeg 라이브러리 경로 추가
+=======
+# OpenCV & FFmpeg 라이브러리 경로 추가
+>>>>>>> 919060a (change to openCV Dynamic Library)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
-# FFmpeg 헤더 경로 추가
+# OpenCV & FFmpeg 헤더 경로 추가
 include_directories(${CMAKE_SOURCE_DIR}/include)
+<<<<<<< HEAD
 
 >>>>>>> 8b7862b (static -> dtnamic)
 
 # Find Qt and OpenCV packages
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network Concurrent)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network Concurrent)
+=======
+include_directories(${CMAKE_SOURCE_DIR}/include/opencv4)
+
+# Find Qt and OpenCV packages
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+>>>>>>> 919060a (change to openCV Dynamic Library)
 
 # Header & C++ Scripts
 set(PROJECT_SOURCES
@@ -68,20 +80,29 @@ target_link_libraries(mz
     # Qt
     Qt${QT_VERSION_MAJOR}::Widgets
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     # OpenCV
     opencv_core
     opencv_imgcodecs
+=======
+
+    # OpenCV
+    opencv_core
+>>>>>>> 919060a (change to openCV Dynamic Library)
     opencv_imgproc
     opencv_highgui
     opencv_videoio
     opencv_video
 
     # ffmpeg
+<<<<<<< HEAD
     iconv
 =======
     ${OpenCV_LIBS}            # Link OpenCV libraries
 >>>>>>> 8b7862b (static -> dtnamic)
+=======
+>>>>>>> 919060a (change to openCV Dynamic Library)
     avcodec       # libavcodec.so
     avformat      # libavformat.so
     avutil        # libavutil.so
@@ -89,11 +110,16 @@ target_link_libraries(mz
     swresample    # libswresample.so
     swscale       # libswscale.so
 <<<<<<< HEAD
+<<<<<<< HEAD
     x264     
 
     # etc.
 =======
 >>>>>>> 8b7862b (static -> dtnamic)
+=======
+
+    # etc.
+>>>>>>> 919060a (change to openCV Dynamic Library)
     pthread                   # Required for FFmpeg and OpenCV
     m                         # Math library
 
