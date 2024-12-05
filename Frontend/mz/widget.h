@@ -29,6 +29,8 @@
 
 #include "networkmanager.h"
 
+#include "networkmanager.h"
+
 using namespace cv;
 using namespace std;
 

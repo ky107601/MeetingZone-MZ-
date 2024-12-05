@@ -17,6 +17,7 @@ Widget::Widget(QWidget *parent)
     // startStreaming();
     setUI();
 
+<<<<<<< HEAD
     // string pipeline = setPipeline();
     // openCamera(pipeline);
 
@@ -185,6 +186,11 @@ void Widget::startStreaming() {
     const std::string rtsp_url = "rtsp://" + networkManager.get_ip_addr() + ":8554/camera";
     qDebug() <<"rtsp_url = " <<rtsp_url;
 
+=======
+
+    /* ========== NetworkManager ========== */
+    networkManager = NetworkManager::getInstance();
+>>>>>>> ba0bac2 (add NM in widget)
     // Register signal handler to clean up resources
     std::signal(SIGINT, [](int) {
         NetworkManager::getInstance().stopMediaMTX();
@@ -195,15 +201,25 @@ void Widget::startStreaming() {
     networkManager.startMediaMTX();
 
     // Start RTSP streaming in a separate thread
+<<<<<<< HEAD
     std::thread streaming_thread(&NetworkManager::startRTSP, &networkManager, rtsp_url);
+=======
+    std::thread streaming_thread(&NetworkManager::rtsp_streaming, &networkManager, rtsp_url);
+>>>>>>> ba0bac2 (add NM in widget)
 
     // Wait for the streaming thread to complete
     streaming_thread.join();
     /* ==================================== */
+<<<<<<< HEAD
     return;
 }
 
 void Widget::setUI() {
+=======
+
+
+
+>>>>>>> ba0bac2 (add NM in widget)
     /* Set the inputBox style */
     QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect();
     shadowEffect->setBlurRadius(5);         // Set blur radius for the shadow
@@ -335,6 +351,7 @@ void Widget::setBackground() {
     return;
 }
 
+<<<<<<< HEAD
 // 새로운 프레임 캡처
 Mat& Widget::captureNewFrame() {
     Mat frame;
@@ -344,6 +361,13 @@ Mat& Widget::captureNewFrame() {
     // }
     // networkManager::
     return frame;
+=======
+Widget::~Widget()
+{
+    // Stop MediaMTX server before exiting
+    networkManager.stopMediaMTX();
+    delete ui;
+>>>>>>> ba0bac2 (add NM in widget)
 }
 
 // 통합 비디오 수신 및 재생
