@@ -69,6 +69,5 @@ public slots:
 private:
     Ui::Widget *ui;
     const std::string rtsp_url;
-    NetworkManager& networkManager;
 };
 #endif // WIDGET_H

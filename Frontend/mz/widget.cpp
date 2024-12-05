@@ -17,7 +17,7 @@ Widget::Widget(QWidget *parent)
 
 
     /* ========== NetworkManager ========== */
-    networkManager = NetworkManager::getInstance();
+    NetworkManager& networkManager = NetworkManager::getInstance();
     // Register signal handler to clean up resources
     std::signal(SIGINT, [](int) {
         NetworkManager::getInstance().stopMediaMTX();
@@ -130,7 +130,7 @@ Widget::Widget(QWidget *parent)
 Widget::~Widget()
 {
     // Stop MediaMTX server before exiting
-    networkManager.stopMediaMTX();
+    NetworkManager::getInstance().stopMediaMTX();
     delete ui;
 }
 
