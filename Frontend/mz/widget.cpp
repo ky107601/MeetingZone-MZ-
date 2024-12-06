@@ -374,6 +374,7 @@ Widget::~Widget()
 >>>>>>> ba0bac2 (add NM in widget)
 }
 
+<<<<<<< HEAD
 // 통합 비디오 수신 및 재생
 void Widget::getVideo() {
     qDebug() << tcpSocket->state();
@@ -403,6 +404,79 @@ void Widget::getVideo() {
             }
             frameData.append(tcpSocket->read(frameSize - frameData.size()));
         }
+=======
+void Widget::changeIcon()
+{
+    if(!micFlag) //status : mic off -> on
+        ui->micBtn->setIcon(micOnIcon);
+    else        //status : mic on -> off
+        ui->micBtn->setIcon(micOffIcon);
+    micFlag = !micFlag;
+    ui->micBtn->setIconSize(QSize(40, 40));
+}
+
+void Widget::updateFrame() {
+    // GrabCut 상태 유지
+    static Mat prevMask, bgModel, fgModel;
+    static bool isInitialized = false;
+    static int frameCounter = 0;
+    static Mat lastBinaryMask, prevFrame;
+
+    // 새로운 프레임 캡처
+    Mat frame;
+    cap.read(frame);
+    if (frame.empty()) {
+        qDebug() << "Unable to grab frame!";
+        return;
+    }
+
+    // 관심 영역 (ROI) 동적 설정
+    Rect roi(10, 10, frame.cols-20, frame.rows-20);
+    Mat frameROI = frame(roi);
+    frame.copyTo(prevFrame);
+
+    // GrabCut 초기화
+    if (!isInitialized) {
+        prevMask = Mat(frameROI.size(), CV_8UC1, Scalar(GC_BGD));
+        Rect initRect(10, 10, frameROI.cols - 20, frameROI.rows - 20);
+        prevMask(initRect).setTo(Scalar(GC_PR_FGD));
+        grabCut(frameROI, prevMask, initRect, bgModel, fgModel, 5, GC_INIT_WITH_RECT);
+        lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
+        isInitialized = true;
+    }
+
+    // 프레임 샘플링 (10프레임마다 GrabCut 실행)
+    if (frameCounter % 10 == 0) {
+        grabCut(frameROI, prevMask, Rect(), bgModel, fgModel, 1, GC_INIT_WITH_MASK);
+        lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
+    }
+
+    // ROI 기반 이진 마스크 축소/확대
+    Mat smallMask, binaryMask;
+    cv::resize(lastBinaryMask, smallMask, Size(), 0.5, 0.5, INTER_NEAREST);
+    cv::resize(smallMask, binaryMask, frame.size(), 0, 0, INTER_NEAREST);
+
+    // RGBA 이미지 생성
+    Mat transparentImg(frame.size(), CV_8UC4, Scalar(0, 0, 0, 0));
+    vector<Mat> bgrChannels;
+    split(frame, bgrChannels);
+
+    Mat alphaChannel;
+    binaryMask.convertTo(alphaChannel, CV_8UC1, 255.0);
+    bgrChannels.push_back(alphaChannel);
+    merge(bgrChannels, transparentImg);
+    
+    // Convert to QImage with transparency
+    QImage qimg(transparentImg.data, transparentImg.cols, transparentImg.rows, transparentImg.step, QImage::Format_RGBA8888);
+    
+    //라벨에 표시
+    cam->setFixedSize(transparentImg.cols / 5, transparentImg.rows / 5);
+    cam->setPixmap(QPixmap::fromImage(qimg).scaled(cam->size(), Qt::KeepAspectRatio));
+
+    // 프레임 카운터 증가
+    frameCounter++;
+}
+>>>>>>> c45efa9 (Update Frame)
 
         // 프레임 디코드
         vector<uchar> buffer(frameData.begin(), frameData.end());
