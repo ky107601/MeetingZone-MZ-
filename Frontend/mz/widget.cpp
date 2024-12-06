@@ -197,7 +197,7 @@ void Widget::updateFrame() {
     
     // Convert to QImage with transparency
     QImage qimg(transparentImg.data, transparentImg.cols, transparentImg.rows, transparentImg.step, QImage::Format_RGBA8888);
-    
+
     //라벨에 표시
     cam->setFixedSize(transparentImg.cols / 5, transparentImg.rows / 5);
     cam->setPixmap(QPixmap::fromImage(qimg).scaled(cam->size(), Qt::KeepAspectRatio));

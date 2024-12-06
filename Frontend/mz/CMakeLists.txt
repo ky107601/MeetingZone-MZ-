@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # OpenCV & FFmpeg 라이브러리 경로 추가
 link_directories(${CMAKE_SOURCE_DIR}/lib)
+link_directories(${CMAKE_SOURCE_DIR}/libiconv-1.16)
 
 # OpenCV & FFmpeg 헤더 경로 추가
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -62,6 +63,7 @@ target_link_libraries(mz
     opencv_video
 
     # ffmpeg
+    iconv
     avcodec       # libavcodec.so
     avformat      # libavformat.so
     avutil        # libavutil.so
