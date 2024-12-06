@@ -1,48 +1,56 @@
 #include "networkmanager.h"
 
-// Funciton to get IP Address
-std::string NetworkManager::get_ip_addr(){
-    struct ifaddrs *ifap = nullptr;
-    struct ifaddrs *i = nullptr;
-    void *src;
-    std::string ip_address = "";
+// Function to set IP Address
+void NetworkManager::set_ip_addr(std::string new_addr) {
+    ip_address = new_addr;
+    return;
+}
 
-    if(getifaddrs(&ifap)==0){ //creates a linked list of structures describing the network interfaces of the local system
-        for(i = ifap; i != nullptr; i=i->ifa_next){
-            if(i->ifa_addr == nullptr)
+// Funciton to get IP Address
+std::string NetworkManager::get_ip_addr() {
+    struct ifaddrs *ifap = nullptr; // 네트워크 인터페이스 구조체 포인터
+    struct ifaddrs *i = nullptr;   // 순회용 포인터
+    void *src;                     // IP 주소 데이터의 시작 지점
+
+    if (getifaddrs(&ifap) == 0) {  // 네트워크 인터페이스 목록 생성
+        for (i = ifap; i != nullptr; i = i->ifa_next) { // 인터페이스 순회
+            if (i->ifa_addr == nullptr) // 주소가 없는 인터페이스는 건너뜀
                 continue;
-            
-            if(i->ifa_addr->sa_family == AF_INET){
-                char tmp[INET_ADDRSTRLEN];
-                src = &((struct sockaddr_in *)i->ifa_addr)->sin_addr;
-                inet_ntop(AF_INET, src, tmp, INET_ADDRSTRLEN); // converts the network address structure to character string
-                if(strcmp(i->ifa_name, "lo")!=0){ // 127.0.0.1 제외
-                    ip_address = tmp;
-                    break;
-                }
+
+            // IPv4 주소만 처리
+            if (i->ifa_addr->sa_family == AF_INET) {
+                src = &((struct sockaddr_in *)i->ifa_addr)->sin_addr; // IPv4 주소 추출
+                char ip[INET_ADDRSTRLEN]; // IPv4 주소 문자열 버퍼
+                inet_ntop(AF_INET, src, ip, INET_ADDRSTRLEN); // 주소를 사람이 읽을 수 있는 문자열로 변환
+                ip_address = ip;
+                break; // 첫 번째 IP 주소를 가져오고 종료
             }
         }
+        if (ifap != nullptr) {
+            freeifaddrs(ifap); // 인터페이스 목록 메모리 해제
+        }
     }
-
-    if (ifap != nullptr) {
-        freeifaddrs(ifap);
-    }
-
-    return ip_address;
+    return ip_address; // IP 주소 반환
 }
 
 // Function to start MediaMTX server
 void NetworkManager::startMediaMTX() {
     std::cout << "Starting MediaMTX server..." << std::endl;
 
-    // Command to start MediaMTX (adjust path as needed)
+    // 실행 파일 확인
+    if (!std::filesystem::exists("./mediamtx")) {
+        std::cerr << "MediaMTX executable not found in the current directory." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Command to start MediaMTX (adjust path as needed) | MediaMTX 서버 실행
     int result = std::system("./mediamtx &");
     if (result != 0) {
         std::cerr << "Failed to start MediaMTX. Please ensure it's installed and accessible." << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    // Wait for the server to initialize (optional, adjust timing)
+    // Wait for the server to initialize (optional, adjust timing) | 서버 초기화 대기
     std::this_thread::sleep_for(std::chrono::seconds(2));
     std::cout << "MediaMTX server started successfully." << std::endl;
 }
@@ -61,22 +69,22 @@ void NetworkManager::stopMediaMTX() {
 }
 
 void NetworkManager::configCodecParam(AVCodecContext* codec_ctx) {
-    codec_ctx->codec_id = AV_CODEC_ID_H264;
-    codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;
-    codec_ctx->bit_rate = 400000;
-    codec_ctx->width = 640;
-    codec_ctx->height = 480;
-    codec_ctx->time_base = AVRational{1, 25};
-    codec_ctx->gop_size = 10;
-    codec_ctx->max_b_frames = 1;
-    codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+    codec_ctx->codec_id = AV_CODEC_ID_H264;              // 코덱 ID를 H.264로 설정
+    codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;          // 미디어 타입을 비디오로 설정
+    codec_ctx->bit_rate = 400000;                        // 비트레이트 설정 (400 kbps)
+    codec_ctx->width = 640;                              // 비디오 해상도 - 가로 640
+    codec_ctx->height = 480;                             // 비디오 해상도 - 세로 480
+    codec_ctx->time_base = AVRational{1, 25};            // 시간 베이스 (프레임 속도: 25 fps)
+    codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)
+    codec_ctx->max_b_frames = 1;                         // 최대 B-프레임 수 (1개)
+    codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;             // 픽셀 포맷을 YUV420P로 설정
     return;
 }
 
 void NetworkManager::setFrame(AVFrame* frame, AVCodecContext* codec_ctx) {
-    frame->format = codec_ctx->pix_fmt;
-    frame->width = codec_ctx->width;
-    frame->height = codec_ctx->height;
+    frame->format = codec_ctx->pix_fmt;   // 프레임의 픽셀 포맷 설정
+    frame->width = codec_ctx->width;     // 프레임의 가로 해상도 설정
+    frame->height = codec_ctx->height;   // 프레임의 세로 해상도 설정
     return;
 }
 

@@ -32,6 +32,9 @@ private:
     NetworkManager(const NetworkManager&) = delete;
     NetworkManager& operator=(const NetworkManager&) = delete;
 
+    // Inner Field
+    std::string ip_address = "";   // Server IP 주소 문자열
+
     // Inner Functions
     void configCodecParam(AVCodecContext* codec_ctx);
     void setFrame(AVFrame* frame, AVCodecContext* codec_ctx);
@@ -44,6 +47,8 @@ public:
         static NetworkManager instance;
         return instance;
     }
+
+    void set_ip_addr(std::string new_addr);
 
     // Funciton to get IP Address
     std::string get_ip_addr();
