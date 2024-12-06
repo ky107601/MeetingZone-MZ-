@@ -37,12 +37,6 @@ std::string NetworkManager::get_ip_addr() {
 void NetworkManager::startMediaMTX() {
     std::cout << "Starting MediaMTX server..." << std::endl;
 
-    // 실행 파일 확인
-    if (!std::filesystem::exists("./mediamtx")) {
-        std::cerr << "MediaMTX executable not found in the current directory." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
     // Command to start MediaMTX (adjust path as needed) | MediaMTX 서버 실행
     int result = std::system("./mediamtx &");
     if (result != 0) {

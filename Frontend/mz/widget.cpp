@@ -144,54 +144,66 @@ void Widget::changeIcon()
     ui->micBtn->setIconSize(QSize(40, 40));
 }
 
-void Widget::updateFrame()
-{
-    static Ptr<BackgroundSubtractor> bgSubtractor = createBackgroundSubtractorMOG2();
+void Widget::updateFrame() {
+    // GrabCut 상태 유지
+    static Mat prevMask, bgModel, fgModel;
+    static bool isInitialized = false;
+    static int frameCounter = 0;
+    static Mat lastBinaryMask, prevFrame;
 
-    Mat frame, fgMask, rgbaFrame;
-    cap.read(frame); // Capture a new frame
-
+    // 새로운 프레임 캡처
+    Mat frame;
+    cap.read(frame);
     if (frame.empty()) {
         qDebug() << "Unable to grab frame!";
         return;
     }
 
-    // 학습 형태
-    //bgSubtractor->apply(frame, fgMask, 0.001);
+    // 관심 영역 (ROI) 동적 설정
+    Rect roi(10, 10, frame.cols-20, frame.rows-20);
+    Mat frameROI = frame(roi);
+    frame.copyTo(prevFrame);
 
-    static int frameCount = 0;
-    if (frameCount < 100) { // 초기 100프레임 동안만 학습
-        bgSubtractor->apply(frame, fgMask, -1);
-        frameCount++;
-    } else {
-        bgSubtractor->apply(frame, fgMask, 0); // 이후 학습 중지
+    // GrabCut 초기화
+    if (!isInitialized) {
+        prevMask = Mat(frameROI.size(), CV_8UC1, Scalar(GC_BGD));
+        Rect initRect(10, 10, frameROI.cols - 20, frameROI.rows - 20);
+        prevMask(initRect).setTo(Scalar(GC_PR_FGD));
+        grabCut(frameROI, prevMask, initRect, bgModel, fgModel, 5, GC_INIT_WITH_RECT);
+        lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
+        isInitialized = true;
     }
 
-    // 가우시안-부드럽게 threshold-이진화
-    GaussianBlur(fgMask, fgMask, Size(11, 11), 3.5, 3.5);
-    threshold(fgMask, fgMask, 200, 255, THRESH_BINARY);
-
-    cvtColor(frame, rgbaFrame, COLOR_BGR2RGBA);
-
-    // 마스크 병합
-    for (int y = 0; y < fgMask.rows; ++y) {
-        for (int x = 0; x < fgMask.cols; ++x) {
-            if (fgMask.at<uchar>(y, x) == 0) {
-                // Background: set alpha to 0 (transparent)
-                rgbaFrame.at<Vec4b>(y, x)[3] = 255;
-            } else {
-                // Foreground: set alpha to 255 (opaque)
-                rgbaFrame.at<Vec4b>(y, x)[3] = 255;
-            }
-        }
+    // 프레임 샘플링 (10프레임마다 GrabCut 실행)
+    if (frameCounter % 10 == 0) {
+        grabCut(frameROI, prevMask, Rect(), bgModel, fgModel, 1, GC_INIT_WITH_MASK);
+        lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
     }
 
+    // ROI 기반 이진 마스크 축소/확대
+    Mat smallMask, binaryMask;
+    cv::resize(lastBinaryMask, smallMask, Size(), 0.5, 0.5, INTER_NEAREST);
+    cv::resize(smallMask, binaryMask, frame.size(), 0, 0, INTER_NEAREST);
+
+    // RGBA 이미지 생성
+    Mat transparentImg(frame.size(), CV_8UC4, Scalar(0, 0, 0, 0));
+    vector<Mat> bgrChannels;
+    split(frame, bgrChannels);
+
+    Mat alphaChannel;
+    binaryMask.convertTo(alphaChannel, CV_8UC1, 255.0);
+    bgrChannels.push_back(alphaChannel);
+    merge(bgrChannels, transparentImg);
+    
     // Convert to QImage with transparency
-    QImage qimg(rgbaFrame.data, rgbaFrame.cols, rgbaFrame.rows, rgbaFrame.step, QImage::Format_RGBA8888);
-
+    QImage qimg(transparentImg.data, transparentImg.cols, transparentImg.rows, transparentImg.step, QImage::Format_RGBA8888);
+    
     //라벨에 표시
-    cam->setFixedSize(rgbaFrame.cols / 5, rgbaFrame.rows / 5);
+    cam->setFixedSize(transparentImg.cols / 5, transparentImg.rows / 5);
     cam->setPixmap(QPixmap::fromImage(qimg).scaled(cam->size(), Qt::KeepAspectRatio));
+
+    // 프레임 카운터 증가
+    frameCounter++;
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
