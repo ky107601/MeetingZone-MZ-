@@ -69,5 +69,20 @@ public slots:
 private:
     Ui::Widget *ui;
     const std::string rtsp_url;
+
+    // Widget()
+    void startStreaming();
+    void setUI();
+    string& setPipeline();
+    void openCamera(string& pipeline);
+    void setTimerForFrame();
+    void setToggleVideo();
+    void setBackground();
+
+    // updateFrame()
+    Mat& captureNewFrame();
+    void setROI(Mat& frameROI);
+    void initGrabCut(Mat& frameROI, bool& isInitialized);
+
 };
 #endif // WIDGET_H
