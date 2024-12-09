@@ -439,9 +439,20 @@ void Widget::updateFrame() {
     static Mat lastBinaryMask, prevFrame;
     
     Mat frame = captureNewFrame();
-    setROI(frameROI); // 관심 영역 (ROI) 동적 설정
-    initGrabCut(frameROI, isInitialized); // GrabCut 초기화
-
+    // 관심 영역 (ROI) 동적 설정
+    Rect roi(10, 10, frame.cols-20, frame.rows-20);
+    frameROI = frame(roi);
+    frame.copyTo(prevFrame);
+    // GrabCut 초기화
+    if (!isInitialized) {
+        prevMask = Mat(frameROI.size(), CV_8UC1, Scalar(GC_BGD));
+        Rect initRect(10, 10, frameROI.cols - 20, frameROI.rows - 20);
+        prevMask(initRect).setTo(Scalar(GC_PR_FGD));
+        grabCut(frameROI, prevMask, initRect, bgModel, fgModel, 5, GC_INIT_WITH_RECT);
+        lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
+        isInitialized = true;
+    }
+    
     // 프레임 샘플링 (10프레임마다 GrabCut 실행)
     if (frameCounter % 10 == 0) {
         grabCut(frameROI, prevMask, Rect(), bgModel, fgModel, 1, GC_INIT_WITH_MASK);
@@ -711,25 +722,4 @@ Mat& Widget::captureNewFrame() {
         qDebug() << "Unable to grab frame!";
     }
     return frame;
-}
-
-// 관심 영역 (ROI) 동적 설정
-void Widget::setROI(Mat& frameROI) {
-    Rect roi(10, 10, frame.cols-20, frame.rows-20);
-    frameROI = frame(roi);
-    frame.copyTo(prevFrame);
-    return;
-}
-
-// GrabCut 초기화
-void Widget::initGrabCut(Mat& frameROI, bool& isInitialized) {
-    if (!isInitialized) {
-        prevMask = Mat(frameROI.size(), CV_8UC1, Scalar(GC_BGD));
-        Rect initRect(10, 10, frameROI.cols - 20, frameROI.rows - 20);
-        prevMask(initRect).setTo(Scalar(GC_PR_FGD));
-        grabCut(frameROI, prevMask, initRect, bgModel, fgModel, 5, GC_INIT_WITH_RECT);
-        lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
-        isInitialized = true;
-    }
-    return;
 }
