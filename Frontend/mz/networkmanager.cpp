@@ -730,7 +730,8 @@ void NetworkManager::stopRTSP() {
     cap.release();
 >>>>>>> 05136ac (clframe write & read)
 
-    std::cout << "RTSP streaming stopped." << std::endl;
+    // std::cout << "RTSP streaming stopped." << std::endl;
+    //~~
 }
 
 <<<<<<< HEAD
