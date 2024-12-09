@@ -35,5 +35,7 @@ extern atomic<bool> stop;
 void handle_client(int client_sock, const std::string& ip);
 void videothread(Mat& frame, queue<Mat>& frameQueue);
 void display_all_client(map<string, queue<Mat>>& frameQueues);
-void videoallplay(Mat& frame, const string& ip) ;
+void videoallplay(Mat& frame, const string& ip);
+Mat mergeFrames(map<string, queue<Mat>>& frameQueues);
+void servtocli(map<string, int>& client, map<string, queue<Mat>>& frameQueues);
 #endif // SERVER_H
