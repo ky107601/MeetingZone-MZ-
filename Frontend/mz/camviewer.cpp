@@ -36,40 +36,21 @@ void camViewer::moveByKey(int key)
     switch(key)
     {
      case 16777234: //left
-        if(position.x() - 5 > 5) //limit
-        {
-             position.setX(position.x() - 5);
-            qDebug() << "(" << position.x() <<", "<<position.y() <<") 로 이동";
+        if(this->pos().x() - 5 > 5) //limit
             move(this->pos().x() - 5, this->pos().y());
-            //서버에 좌표 전송(this->pos().x() - 5, this->pos().y());
-        }
-        break;
+         break;
      case 16777235: //up
-        if(position.y() - 5 > 5)
-         {
-             position.setY(position.y() - 5);
-            qDebug() << "(" << position.x() <<", "<<position.y() <<") 로 이동";
+         if(this->pos().y() - 5 > 5)
             move(this->pos().x(), this->pos().y() - 5);
-            //서버에 좌표 전송(this->pos().x(), this->pos().y() - 5);
-        }
-        break;
+         break;
      case 16777236: //right
-         if(position.x() + 5 < 666)
-         {
-             position.setX(position.x() + 5);
-             qDebug() << "(" << position.x() <<", "<<position.y() <<") 로 이동";
+         if(this->pos().x() + 5 < 666)
              move(this->pos().x() + 5, this->pos().y());
-            //서버에 좌표 전송(this->pos().x() + 5, this->pos().y());
-         }
          break;
      case 16777237: //down
-         if(position.y() + 5 < 360)
-         {
-             position.setY(position.y() + 5);
-             qDebug() << "(" << position.x() <<", "<<position.y() <<") 로 이동";
+         if(this->pos().y() + 5 < 360)
              move(this->pos().x(), this->pos().y() + 5);
-            //서버에 좌표 전송(this->pos().x(), this->pos().y() + 5);
-         }
-        break;
+         break;
+
     }
 }

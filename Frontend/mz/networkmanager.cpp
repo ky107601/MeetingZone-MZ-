@@ -252,7 +252,8 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
   //  sws_freeContext(sws_ctx);
     cap.release();
 
-    std::cout << "RTSP streaming stopped." << std::endl;
+    // std::cout << "RTSP streaming stopped." << std::endl;
+    //~~
 }
 
 int test_main() {
