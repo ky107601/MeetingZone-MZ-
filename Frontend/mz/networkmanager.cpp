@@ -185,68 +185,70 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     }
 
     cv::Mat image;
-    SwsContext* sws_ctx = sws_getContext(
-        codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
-        codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
-        SWS_BILINEAR, nullptr, nullptr, nullptr);
+    //~~
+    // SwsContext* sws_ctx = sws_getContext(
+    //     codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
+    //     codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
+    //     SWS_BILINEAR, nullptr, nullptr, nullptr);
 
-    int frame_count = 0;
-    int64_t pts = 0;
+    // int frame_count = 0;
+    // int64_t pts = 0;
 
-    while (cap.read(image)) {
-        // Convert to YUV format
-        const uint8_t* data[1] = {image.data};
-        int linesize[1] = {static_cast<int>(image.step[0])};
-        sws_scale(sws_ctx, data, linesize, 0, codec_ctx->height, frame->data, frame->linesize);
+    // while (cap.read(image)) {
+    //     // Convert to YUV format
+    //     const uint8_t* data[1] = {image.data};
+    //     int linesize[1] = {static_cast<int>(image.step[0])};
+    //     sws_scale(sws_ctx, data, linesize, 0, codec_ctx->height, frame->data, frame->linesize);
 
-        // 타임스탬프 계산
-        frame->pts = pts;
-        pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
+    //     // 타임스탬프 계산
+    //     frame->pts = pts;
+    //     pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
 
-        AVPacket *pkt = av_packet_alloc();
-        int ret = avcodec_send_frame(codec_ctx, frame);
-        if (ret >= 0) {
-            while (ret >= 0) {
-                ret = avcodec_receive_packet(codec_ctx, pkt);
-                if (ret == 0) {
-                    pkt->stream_index = video_stream->index;
-                    pkt->pts = pkt->dts = frame_count++;
+    //     AVPacket *pkt = av_packet_alloc();
+    //     int ret = avcodec_send_frame(codec_ctx, frame);
+    //     if (ret >= 0) {
+    //         while (ret >= 0) {
+    //             ret = avcodec_receive_packet(codec_ctx, pkt);
+    //             if (ret == 0) {
+    //                 pkt->stream_index = video_stream->index;
+    //                 pkt->pts = pkt->dts = frame_count++;
 
-                    std::cout << "PTS: " << pkt->pts << std::endl;
+    //                 std::cout << "PTS: " << pkt->pts << std::endl;
 
-                    // 패킷 쓰기 전 추가 검사
-                    if (pkt->pts >= 0) {
-                        av_packet_rescale_ts(pkt, codec_ctx->time_base, video_stream->time_base);
-                        ret = av_interleaved_write_frame(output_ctx, pkt);
-                        if (ret < 0) {
-                            char errbuf[AV_ERROR_MAX_STRING_SIZE];
-                            av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-                            std::cerr << "Error writing frame: " << errbuf << std::endl;
-                        }
-                    }
+    //                 // 패킷 쓰기 전 추가 검사
+    //                 if (pkt->pts >= 0) {
+    //                     av_packet_rescale_ts(pkt, codec_ctx->time_base, video_stream->time_base);
+    //                     ret = av_interleaved_write_frame(output_ctx, pkt);
+    //                     if (ret < 0) {
+    //                         char errbuf[AV_ERROR_MAX_STRING_SIZE];
+    //                         av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
+    //                         std::cerr << "Error writing frame: " << errbuf << std::endl;
+    //                     }
+    //                 }
                     
-                    av_packet_unref(pkt);
-                } else if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                    break;
-                } else {
-                    char errbuf[AV_ERROR_MAX_STRING_SIZE];
-                    av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-                    std::cerr << "Error encoding frame: " << errbuf << std::endl;
-                    break;
-                }
-            }
-        }
+    //                 av_packet_unref(pkt);
+    //             } else if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+    //                 break;
+    //             } else {
+    //                 char errbuf[AV_ERROR_MAX_STRING_SIZE];
+    //                 av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
+    //                 std::cerr << "Error encoding frame: " << errbuf << std::endl;
+    //                 break;
+    //             }
+    //         }
+    //     }
 
-        av_packet_free(&pkt);
-    }
+    //     av_packet_free(&pkt);
+    // }
     
-    // Cleanup
-    av_write_trailer(output_ctx);
-    freeAllAV(output_ctx, frame, buffer, codec_ctx);
-    sws_freeContext(sws_ctx);
-    cap.release();
+    // // Cleanup
+    // av_write_trailer(output_ctx);
+    // freeAllAV(output_ctx, frame, buffer, codec_ctx);
+    // sws_freeContext(sws_ctx);
+    // cap.release();
 
-    std::cout << "RTSP streaming stopped." << std::endl;
+    // std::cout << "RTSP streaming stopped." << std::endl;
+    //~~
 }
 
 int test_main() {

@@ -13,7 +13,10 @@ void camViewer::mouseMoveEvent(QMouseEvent *event)
         QPoint newPos = event->globalPos() - offset;
         qDebug()<<"pos = "<<newPos;
         if(newPos.x() > 10 && newPos.x()< 661 && newPos.y() > 10 && newPos.y() < 355)
-            this->move(newPos);
+        {
+            //this->move(newPos);
+            //서버에 newPos 전송
+        }
     }
 }
 
@@ -32,20 +35,31 @@ void camViewer::moveByKey(int key)
     {
      case 16777234: //left
         if(this->pos().x() - 5 > 5) //limit
-            move(this->pos().x() - 5, this->pos().y());
-         break;
+        {
+            //move(this->pos().x() - 5, this->pos().y());
+            //서버에 좌표 전송(this->pos().x() - 5, this->pos().y());
+        }
+        break;
      case 16777235: //up
-         if(this->pos().y() - 5 > 5)
-            move(this->pos().x(), this->pos().y() - 5);
-         break;
+        if(this->pos().y() - 5 > 5)
+         {
+            //move(this->pos().x(), this->pos().y() - 5);
+            //서버에 좌표 전송(this->pos().x(), this->pos().y() - 5);
+        }
+        break;
      case 16777236: //right
          if(this->pos().x() + 5 < 666)
-             move(this->pos().x() + 5, this->pos().y());
+         {
+             //move(this->pos().x() + 5, this->pos().y());
+            //서버에 좌표 전송(this->pos().x() + 5, this->pos().y());
+         }
          break;
      case 16777237: //down
          if(this->pos().y() + 5 < 360)
-             move(this->pos().x(), this->pos().y() + 5);
-         break;
-
+         {
+             //move(this->pos().x(), this->pos().y() + 5);
+            //서버에 좌표 전송(this->pos().x(), this->pos().y() + 5);
+         }
+        break;
     }
 }
