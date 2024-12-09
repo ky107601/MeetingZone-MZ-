@@ -81,8 +81,5 @@ private:
 
     // updateFrame()
     Mat& captureNewFrame();
-    void setROI(Mat& frameROI);
-    void initGrabCut(Mat& frameROI, bool& isInitialized);
-
 };
 #endif // WIDGET_H
