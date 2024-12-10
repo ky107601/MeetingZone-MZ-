@@ -68,10 +68,10 @@ void videoallplay(Mat& frame, const string& ip) {
 // 프레임 병합 함수
 Mat mergeFrames(map<string, queue<Mat>>& frameQueues) {
     int cols = 2;
-    int rows = (frameQueues.size() + cols - 1) / cols;
+    int rows = 2;
     int width = 320, height = 240;
 
-    mergedFrame = Mat::zeros(rows * height, cols * width, CV_8UC3);
+    mergedFrame = Mat::zeros(1280,960, CV_8UC3);
 
     int i = 0;
     for (auto& [ip, frameQueue] : frameQueues) {
