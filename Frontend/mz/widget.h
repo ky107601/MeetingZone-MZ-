@@ -63,6 +63,8 @@ public:
     backgroundPicture picture;
     QLabel *chatBox;
 
+    Mat recFrame;
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
