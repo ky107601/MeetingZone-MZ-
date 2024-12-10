@@ -70,6 +70,7 @@ target_link_libraries(mz
     avdevice      # libavdevice.so
     swresample    # libswresample.so
     swscale       # libswscale.so
+    x264     
 
     # etc.
     pthread                   # Required for FFmpeg and OpenCV
