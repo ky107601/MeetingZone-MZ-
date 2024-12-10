@@ -58,7 +58,7 @@ private:
     void openCamera();
     void sendImages();
     void updateImage(cv::Mat& image, int imageCounter);
-    void sendXY(QByteArray data);
+    //void sendXY(QByteArray data);
 
 public:
     // Singleton GetInstance()
