@@ -42,9 +42,14 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network Concurren
 include_directories(${CMAKE_SOURCE_DIR}/include/opencv4)
 
 # Find Qt and OpenCV packages
+<<<<<<< HEAD
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 >>>>>>> 919060a (change to openCV Dynamic Library)
+=======
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network Concurrent)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network Concurrent)
+>>>>>>> 05136ac (clframe write & read)
 
 # Header & C++ Scripts
 set(PROJECT_SOURCES
@@ -85,11 +90,14 @@ target_link_libraries(mz
     # OpenCV
     opencv_core
     opencv_imgcodecs
+<<<<<<< HEAD
 =======
 
     # OpenCV
     opencv_core
 >>>>>>> 919060a (change to openCV Dynamic Library)
+=======
+>>>>>>> 05136ac (clframe write & read)
     opencv_imgproc
     opencv_highgui
     opencv_videoio

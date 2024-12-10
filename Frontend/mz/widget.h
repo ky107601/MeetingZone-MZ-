@@ -26,8 +26,11 @@
 #include <QFileDialog>
 #include <QAbstractSocket>
 #include <QtConcurrent>
+<<<<<<< HEAD
 
 #include "networkmanager.h"
+=======
+>>>>>>> 05136ac (clframe write & read)
 
 #include "networkmanager.h"
 
@@ -64,8 +67,11 @@ public:
 
     backgroundPicture picture;
     QLabel *chatBox;
+<<<<<<< HEAD
 
     Mat recFrame;
+=======
+>>>>>>> 05136ac (clframe write & read)
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

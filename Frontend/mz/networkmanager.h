@@ -89,6 +89,7 @@ public:
 #include <chrono>
 #include <string>
 #include <opencv2/opencv.hpp>
+#include <QDebug>
 
 extern "C" {
     #include <ifaddrs.h>
