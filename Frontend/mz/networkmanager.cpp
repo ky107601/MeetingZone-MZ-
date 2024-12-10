@@ -14,38 +14,29 @@ void NetworkManager::set_ip_addr(std::string new_addr) {
 
 // Funciton to get IP Address
 std::string NetworkManager::get_ip_addr() {
-    // struct ifaddrs *ifap = nullptr; // 네트워크 인터페이스 구조체 포인터
-    // struct ifaddrs *i = nullptr;   // 순회용 포인터
-    // void *src;                     // IP 주소 데이터의 시작 지점
+    struct ifaddrs *ifap = nullptr; // 네트워크 인터페이스 구조체 포인터
+    struct ifaddrs *i = nullptr;   // 순회용 포인터
+    void *src;                     // IP 주소 데이터의 시작 지점
 
-    // if (getifaddrs(&ifap) == 0) {  // 네트워크 인터페이스 목록 생성
-    //     for (i = ifap; i != nullptr; i = i->ifa_next) { // 인터페이스 순회
-    //         if (i->ifa_addr == nullptr) // 주소가 없는 인터페이스는 건너뜀
-    //             continue;
+    if (getifaddrs(&ifap) == 0) {  // 네트워크 인터페이스 목록 생성
+        for (i = ifap; i != nullptr; i = i->ifa_next) { // 인터페이스 순회
+            if (i->ifa_addr == nullptr) // 주소가 없는 인터페이스는 건너뜀
+                continue;
 
-    //         // IPv4 주소만 처리
-    //         if (i->ifa_addr->sa_family == AF_INET) {
-    //             src = &((struct sockaddr_in *)i->ifa_addr)->sin_addr; // IPv4 주소 추출
-    //             char ip[INET_ADDRSTRLEN]; // IPv4 주소 문자열 버퍼
-    //             inet_ntop(AF_INET, src, ip, INET_ADDRSTRLEN); // 주소를 사람이 읽을 수 있는 문자열로 변환
-    //             ip_address = ip;
-    //             break; // 첫 번째 IP 주소를 가져오고 종료
-    //         }
-    //     }
-    //     if (ifap != nullptr) {
-    //         freeifaddrs(ifap); // 인터페이스 목록 메모리 해제
-    //     }
-    // }
+            // IPv4 주소만 처리
+            if (i->ifa_addr->sa_family == AF_INET) {
+                src = &((struct sockaddr_in *)i->ifa_addr)->sin_addr; // IPv4 주소 추출
+                char ip[INET_ADDRSTRLEN]; // IPv4 주소 문자열 버퍼
+                inet_ntop(AF_INET, src, ip, INET_ADDRSTRLEN); // 주소를 사람이 읽을 수 있는 문자열로 변환
+                ip_address = ip;
+                break; // 첫 번째 IP 주소를 가져오고 종료
+            }
+        }
+        if (ifap != nullptr) {
+            freeifaddrs(ifap); // 인터페이스 목록 메모리 해제
+        }
+    }
     return ip_address; // IP 주소 반환
-}
-
-void NetworkManager::setImage(const cv::Mat& img) {
-    image = img;
-    return;
-}
-
-const cv::Mat& NetworkManager::getImage() const {
-    return image; 
 }
 
 // Function to start MediaMTX server
@@ -152,6 +143,7 @@ void NetworkManager::configCodecParam() {
     codec_ctx->width = width;                              // 비디오 해상도 - 가로 640
     codec_ctx->height = height;                             // 비디오 해상도 - 세로 480
     codec_ctx->time_base = AVRational{1, frameRate};            // 시간 베이스 (프레임 속도: 10 fps)
+<<<<<<< HEAD
     codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)00000
     codec_ctx->max_b_frames = 1;                         // 최대 B-프레임 수 (1개)
     codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;             // 픽셀 포맷을 YUV420P로 설정
@@ -177,6 +169,8 @@ void NetworkManager::configCodecParam() {
     codec_ctx->width = 640;                              // 비디오 해상도 - 가로 640
     codec_ctx->height = 480;                             // 비디오 해상도 - 세로 480
     codec_ctx->time_base = AVRational{1, 10};            // 시간 베이스 (프레임 속도: 10 fps)
+=======
+>>>>>>> 04060e9 (send data success)
     codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)00000
     codec_ctx->max_b_frames = 1;                         // 최대 B-프레임 수 (1개)
     codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;             // 픽셀 포맷을 YUV420P로 설정
@@ -234,10 +228,17 @@ void NetworkManager::openCamera() {
 >>>>>>> 1e2b5bf (Fix minor error)
 void NetworkManager::openCamera() {
     // OpenCV camera capture
+<<<<<<< HEAD
     std::string pipeline = "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 \
     ! video/x-raw,width=640,height=480,framerate=10/1,format=BGR ! appsink";
 
 >>>>>>> 3a9080f (update)
+=======
+    std::string pipeline =
+        "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 ! video/x-raw, width="
+        + std::to_string(width) + ",height=" + std::to_string(height) + ",framerate=" + std::to_string(frameRate)
+        + "/1,format=RGBx ! videoconvert ! videoscale ! appsink";
+>>>>>>> 04060e9 (send data success)
     cap.open(pipeline, cv::CAP_GSTREAMER);
 
     if (!cap.isOpened()) {
@@ -256,6 +257,9 @@ void NetworkManager::openCamera() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 04060e9 (send data success)
 
 void NetworkManager::updateImage(cv::Mat& image, int imageCounter) {
     // GrabCut 상태 유지
@@ -302,6 +306,7 @@ void NetworkManager::updateImage(cv::Mat& image, int imageCounter) {
 }
 
 
+<<<<<<< HEAD
 void NetworkManager::sendImages() {
     cv::Mat image;
     int64_t pts = 0;
@@ -314,12 +319,18 @@ void NetworkManager::sendImages() {
 
         // Convert to YUV format
 =======
+=======
+>>>>>>> 04060e9 (send data success)
 void NetworkManager::sendImages() {
-    int frame_count = 0;
+    cv::Mat image;
     int64_t pts = 0;
     AVPacket *pkt = nullptr;
+    int frameCounter = 0;
 
-    while (cap.read(image)) {
+    while(cap.read(image)) {
+
+        // updateImage(image, frameCounter);
+
         // Convert to YUV format
 <<<<<<< HEAD
         qDebug() << "sendImages()";
@@ -334,6 +345,7 @@ void NetworkManager::sendImages() {
         frame->pts = pts;
         pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         AVPacket *pkt = av_packet_alloc();
         int ret = avcodec_send_frame(codec_ctx, frame);
@@ -367,37 +379,42 @@ void NetworkManager::sendImages() {
                 break;
 =======
         pkt = av_packet_alloc();
+=======
+        AVPacket *pkt = av_packet_alloc();
+>>>>>>> 04060e9 (send data success)
         int ret = avcodec_send_frame(codec_ctx, frame);
-        if (ret >= 0) {
-            while (ret >= 0) {
-                ret = avcodec_receive_packet(codec_ctx, pkt);
-                if (ret == 0) {
-                    pkt->stream_index = video_stream->index;
-                    pkt->pts = pkt->dts = frame_count++;
 
-                    std::cout << "PTS: " << pkt->pts << std::endl;
+        while (ret >= 0) {
+            ret = avcodec_receive_packet(codec_ctx, pkt);
+            if (ret == 0) {
+                pkt->stream_index = video_stream->index;
+                pkt->pts = pkt->dts = frameCounter++;
 
-                    // 패킷 쓰기 전 추가 검사
-                    if (pkt->pts >= 0) {
-                        av_packet_rescale_ts(pkt, codec_ctx->time_base, video_stream->time_base);
-                        ret = av_interleaved_write_frame(output_ctx, pkt);
-                        if (ret < 0) {
-                            char errbuf[AV_ERROR_MAX_STRING_SIZE];
-                            av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-                            std::cerr << "Error writing frame: " << errbuf << std::endl;
-                        }
+                std::cout << "PTS: " << pkt->pts << std::endl;
+
+                // 패킷 쓰기 전 추가 검사
+                if (pkt->pts >= 0) {
+                    av_packet_rescale_ts(pkt, codec_ctx->time_base, video_stream->time_base);
+                    ret = av_interleaved_write_frame(output_ctx, pkt);
+                    if (ret < 0) {
+                        char errbuf[AV_ERROR_MAX_STRING_SIZE];
+                        av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
+                        std::cerr << "Error writing frame: " << errbuf << std::endl;
                     }
-                    
-                    av_packet_unref(pkt);
-                } else if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                    break;
-                } else {
-                    char errbuf[AV_ERROR_MAX_STRING_SIZE];
-                    av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-                    std::cerr << "Error encoding frame: " << errbuf << std::endl;
-                    break;
                 }
+<<<<<<< HEAD
 >>>>>>> 3a9080f (update)
+=======
+
+                av_packet_unref(pkt);
+            } else if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                break;
+            } else {
+                char errbuf[AV_ERROR_MAX_STRING_SIZE];
+                av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
+                std::cerr << "Error encoding frame: " << errbuf << std::endl;
+                break;
+>>>>>>> 04060e9 (send data success)
             }
         }
         av_packet_free(&pkt);
@@ -405,6 +422,9 @@ void NetworkManager::sendImages() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 04060e9 (send data success)
 void NetworkManager::startRTSP(const std::string& rtsp_url) {
     // Initialize FFmpeg
     avformat_network_init();
@@ -543,7 +563,6 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 
     // Configure codec parameters
     configCodecParam();
-    
     if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
         std::cerr << "Failed to open codec!" << std::endl;
         avcodec_free_context(&codec_ctx);
@@ -753,6 +772,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     if (!(output_ctx->oformat->flags & AVFMT_NOFILE)) {
         if (avio_open(&output_ctx->pb, rtsp_url.c_str(), AVIO_FLAG_WRITE) < 0) {
@@ -763,11 +783,14 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     }
 
 >>>>>>> 9d292ba (add x264)
+=======
+>>>>>>> 04060e9 (send data success)
     if (avformat_write_header(output_ctx, nullptr) < 0) {
         std::cerr << "Failed to write RTSP header!" << std::endl;
         freeAllAV();
         return;
     }
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> 376b8df (add x264)
 =======
@@ -785,6 +808,13 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 >>>>>>> 9d292ba (add x264)
 =======
 >>>>>>> 182b86b (receiving video)
+=======
+
+    sws_ctx = sws_getContext(
+        codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
+        codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
+        SWS_BILINEAR, nullptr, nullptr, nullptr);
+>>>>>>> 04060e9 (send data success)
 
     sws_ctx = sws_getContext(
         codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
@@ -796,7 +826,9 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 
     openCamera();
     sendImages();
+}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     cv::Mat image;
 <<<<<<< HEAD
@@ -917,16 +949,23 @@ void NetworkManager::stopRTSP() {
 =======
 =======
 >>>>>>> 3a9080f (update)
+=======
+void NetworkManager::stopRTSP() {
+>>>>>>> 04060e9 (send data success)
     // Cleanup
     av_write_trailer(output_ctx);
     freeAllAV();
     sws_freeContext(sws_ctx);
+<<<<<<< HEAD
     cap.release();
 >>>>>>> 05136ac (clframe write & read)
 
 
     //std::cout << "RTSP streaming stopped." << std::endl;
+=======
+>>>>>>> 04060e9 (send data success)
 
+    std::cout << "RTSP streaming stopped." << std::endl;
 }
 
 <<<<<<< HEAD
@@ -954,10 +993,12 @@ int NetworkManager::test_main() {
 =======
 int test_main() {
     NetworkManager& networkManager = NetworkManager::getInstance();
-    const std::string rtsp_url = "rtsps://" + networkManager.get_ip_addr() + ":8322/camera";
+    const std::string rtsp_url = "rtsp://" + networkManager.get_ip_addr() + ":8554/camera";
 
     // Register signal handler to clean up resources
     std::signal(SIGINT, [](int) {
+        // Stop MediaMTX server before exiting
+        NetworkManager::getInstance().stopRTSP();
         NetworkManager::getInstance().stopMediaMTX();
 >>>>>>> d4a3a58 (choi jeok hwa)
         exit(EXIT_SUCCESS);
@@ -980,13 +1021,20 @@ int test_main() {
     networkManager.startMediaMTX();
 
     // Start RTSP streaming in a separate thread
+<<<<<<< HEAD
     std::thread streaming_thread(&NetworkManager::rtsp_streaming, &networkManager, rtsp_url);
 >>>>>>> d4a3a58 (choi jeok hwa)
+=======
+    std::thread streaming_thread(&NetworkManager::startRTSP, &networkManager, rtsp_url);
+>>>>>>> 04060e9 (send data success)
 
     // Wait for the streaming thread to complete
     streaming_thread.join();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 04060e9 (send data success)
     networkManager.stopRTSP();
     networkManager.stopMediaMTX();
 =======
