@@ -33,6 +33,15 @@ std::string NetworkManager::get_ip_addr() {
     return ip_address; // IP 주소 반환
 }
 
+void NetworkManager::setImage(const cv::Mat& img) {
+    image = img;
+    return;
+}
+
+const cv::Mat& NetworkManager::getImage() const {
+    return image; 
+}
+
 // Function to start MediaMTX server
 void NetworkManager::startMediaMTX() {
     std::cout << "Starting MediaMTX server..." << std::endl;
@@ -68,8 +77,8 @@ void NetworkManager::configCodecParam(AVCodecContext* codec_ctx) {
     codec_ctx->bit_rate = 400000;                        // 비트레이트 설정 (400 kbps)
     codec_ctx->width = 640;                              // 비디오 해상도 - 가로 640
     codec_ctx->height = 480;                             // 비디오 해상도 - 세로 480
-    codec_ctx->time_base = AVRational{1, 25};            // 시간 베이스 (프레임 속도: 25 fps)
-    codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)
+    codec_ctx->time_base = AVRational{1, 25};            // 시간 베이스 (프레임 속도: 10 fps)
+    codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)00000
     codec_ctx->max_b_frames = 1;                         // 최대 B-프레임 수 (1개)
     codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;             // 픽셀 포맷을 YUV420P로 설정
     return;
@@ -82,8 +91,8 @@ void NetworkManager::setFrame(AVFrame* frame, AVCodecContext* codec_ctx) {
     return;
 }
 
-void NetworkManager::freeAllAV(AVFormatContext *output_ctx, 
-    AVFrame* frame, uint8_t *buffer, AVCodecContext *codec_ctx) {
+void NetworkManager::freeAllAV(AVFormatContext *output_ctx,
+                               AVFrame* frame, uint8_t *buffer, AVCodecContext *codec_ctx) {
     avformat_free_context(output_ctx);
     av_frame_free(&frame);
     av_free(buffer);
@@ -91,15 +100,82 @@ void NetworkManager::freeAllAV(AVFormatContext *output_ctx,
     return;
 }
 
+void NetworkManager::openCamera() {
+    // OpenCV camera capture
+    std::string pipeline = "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 \
+    ! video/x-raw,width=640,height=480,framerate=10/1,format=BGR ! appsink";
+
+    cap.open(pipeline, cv::CAP_GSTREAMER);
+
+    if (!cap.isOpened()) {
+        std::cerr << "Failed to open camera!" << std::endl;
+        freeAllAV(output_ctx, frame, buffer, codec_ctx);
+        return;
+    }
+}
+
+void NetworkManager::sendImages() {
+    int frame_count = 0;
+    int64_t pts = 0;
+    AVPacket *pkt = nullptr;
+
+    while (cap.read(image)) {
+        // Convert to YUV format
+        qDebug() << "sendImages()";
+        const uint8_t* data[1] = {image.data};
+        int linesize[1] = {static_cast<int>(image.step[0])};
+        sws_scale(sws_ctx, data, linesize, 0, codec_ctx->height, frame->data, frame->linesize);
+
+        // 타임스탬프 계산
+        frame->pts = pts;
+        pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
+
+        pkt = av_packet_alloc();
+        int ret = avcodec_send_frame(codec_ctx, frame);
+        if (ret >= 0) {
+            while (ret >= 0) {
+                ret = avcodec_receive_packet(codec_ctx, pkt);
+                if (ret == 0) {
+                    pkt->stream_index = video_stream->index;
+                    pkt->pts = pkt->dts = frame_count++;
+
+                    std::cout << "PTS: " << pkt->pts << std::endl;
+
+                    // 패킷 쓰기 전 추가 검사
+                    if (pkt->pts >= 0) {
+                        av_packet_rescale_ts(pkt, codec_ctx->time_base, video_stream->time_base);
+                        ret = av_interleaved_write_frame(output_ctx, pkt);
+                        if (ret < 0) {
+                            char errbuf[AV_ERROR_MAX_STRING_SIZE];
+                            av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
+                            std::cerr << "Error writing frame: " << errbuf << std::endl;
+                        }
+                    }
+
+                    av_packet_unref(pkt);
+                } else if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                    break;
+                } else {
+                    char errbuf[AV_ERROR_MAX_STRING_SIZE];
+                    av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
+                    std::cerr << "Error encoding frame: " << errbuf << std::endl;
+                    break;
+                }
+            }
+        }
+        av_packet_free(&pkt);
+    }
+}
+
 void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     // Initialize FFmpeg
     avformat_network_init();
 
     // RTSP Output Context
-    AVFormatContext* output_ctx = nullptr;
-    AVStream* video_stream = nullptr;
+    output_ctx = nullptr;
+    video_stream = nullptr;
 
-    // Codec and codec context
+    // Video codec
     const AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
     if (!codec) {
         std::cerr << "H.264 codec not found!" << std::endl;
@@ -107,7 +183,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     }
 
     // Video codec context
-    AVCodecContext* codec_ctx = avcodec_alloc_context3(codec);
+    codec_ctx = avcodec_alloc_context3(codec);
     if (!codec_ctx) {
         std::cerr << "Failed to allocate codec context!" << std::endl;
         return;
@@ -123,7 +199,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     }
 
     // Allocate frame and buffer
-    AVFrame* frame = av_frame_alloc();
+    frame = av_frame_alloc();
     if (!frame) {
         std::cerr << "Failed to allocate frame!" << std::endl;
         avcodec_free_context(&codec_ctx);
@@ -132,7 +208,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     setFrame(frame, codec_ctx);
 
     int buffer_size = av_image_get_buffer_size(codec_ctx->pix_fmt, codec_ctx->width, codec_ctx->height, 1);
-    uint8_t* buffer = (uint8_t*)av_malloc(buffer_size);
+    buffer = (uint8_t*)av_malloc(buffer_size);
     av_image_fill_arrays(frame->data, frame->linesize, buffer, codec_ctx->pix_fmt, codec_ctx->width, codec_ctx->height, 1);
 
     // Open output context
@@ -175,84 +251,18 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 
     std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
 
-    // OpenCV camera capture
-    cv::VideoCapture cap("libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 \
-    ! video/x-raw,width=640,height=480,framerate=25/1,format=BGR "
-                         "! videoconvert ! videoscale  ! appsink", cv::CAP_GSTREAMER);  // Adjust the camera index as needed
-    if (!cap.isOpened()) {
-        std::cerr << "Failed to open camera!" << std::endl;
-       // freeAllAV(output_ctx, frame, buffer, codec_ctx);
-        return;
-    }
+    openCamera();
+    sendThread = std::thread(&NetworkManager::sendImages, this);
 
-    cv::Mat image;
-
-    SwsContext* sws_ctx = sws_getContext(
-        codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
-        codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
-        SWS_BILINEAR, nullptr, nullptr, nullptr);
-
-    int frame_count = 0;
-
-    int64_t pts = 0;
-
-    while (cap.read(image)) {
-        if (image.empty()) {
-            qDebug() << "Unable to grab frame!";
-        }
-
-        // Convert to YUV format
-    //     const uint8_t* data[1] = {image.data};
-    //     int linesize[1] = {static_cast<int>(image.step[0])};
-    //     sws_scale(sws_ctx, data, linesize, 0, codec_ctx->height, frame->data, frame->linesize);
-
-    //     // 타임스탬프 계산
-    //     frame->pts = pts;
-    //     pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
-
-    //     AVPacket *pkt = av_packet_alloc();
-    //     int ret = avcodec_send_frame(codec_ctx, frame);
-    //     if (ret >= 0) {
-    //         while (ret >= 0) {
-    //             ret = avcodec_receive_packet(codec_ctx, pkt);
-    //             if (ret == 0) {
-    //                 pkt->stream_index = video_stream->index;
-    //                 pkt->pts = pkt->dts = frame_count++;
-
-    //                 std::cout << "PTS: " << pkt->pts << std::endl;
-
-    //                 // 패킷 쓰기 전 추가 검사
-    //                 if (pkt->pts >= 0) {
-    //                     av_packet_rescale_ts(pkt, codec_ctx->time_base, video_stream->time_base);
-    //                     ret = av_interleaved_write_frame(output_ctx, pkt);
-    //                     if (ret < 0) {
-    //                         char errbuf[AV_ERROR_MAX_STRING_SIZE];
-    //                         av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-    //                         std::cerr << "Error writing frame: " << errbuf << std::endl;
-    //                     }
-    //                 }
-                    
-    //                 av_packet_unref(pkt);
-    //             } else if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-    //                 break;
-    //             } else {
-    //                 char errbuf[AV_ERROR_MAX_STRING_SIZE];
-    //                 av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-    //                 std::cerr << "Error encoding frame: " << errbuf << std::endl;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     av_packet_free(&pkt);
-     }
-    
     // Cleanup
-    //av_write_trailer(output_ctx);
-  //  freeAllAV(output_ctx, frame, buffer, codec_ctx);
-  //  sws_freeContext(sws_ctx);
+    // av_write_trailer(output_ctx);
+    // freeAllAV();
+    // sws_freeContext(sws_ctx);
     cap.release();
 
+
     std::cout << "RTSP streaming stopped." << std::endl;
+
 }
 
 int test_main() {
