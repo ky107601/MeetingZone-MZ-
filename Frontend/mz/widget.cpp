@@ -182,7 +182,7 @@ void Widget::startStreaming() {
     //rtsp_url set_ip_addr로 설정
 
     qDebug() <<"ui->inpustServerAd->text().toStdString()" << ui->inputServerAd->text().toStdString();
-    const std::string rtsp_url = "rtsps://" + networkManager.get_ip_addr() + ":8322/camera";
+    const std::string rtsp_url = "rtsp://" + networkManager.get_ip_addr() + ":8554/camera";
     qDebug() <<"rtsp_url = " <<rtsp_url;
 
     // Register signal handler to clean up resources
@@ -195,7 +195,7 @@ void Widget::startStreaming() {
     networkManager.startMediaMTX();
 
     // Start RTSP streaming in a separate thread
-    std::thread streaming_thread(&NetworkManager::rtsp_streaming, &networkManager, rtsp_url);
+    std::thread streaming_thread(&NetworkManager::startRTSP, &networkManager, rtsp_url);
 
     // Wait for the streaming thread to complete
     streaming_thread.join();

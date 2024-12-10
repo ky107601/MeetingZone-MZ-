@@ -7,29 +7,27 @@
 #include <csignal>
 #include <chrono>
 #include <string>
-#include <opencv2/opencv.hpp>
-
-// ======삭제할 것=======
-#include <QDebug>
-// =====================
+#include <opencv4/opencv2/opencv.hpp>
+#include <opencv4/opencv2/highgui.hpp>
+#include <opencv4/opencv2/videoio.hpp>
+#include <opencv4/opencv2/core/mat.hpp>
 
 extern "C" {
-    #include <ifaddrs.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
-    #include <libavformat/avformat.h>
-    #include <libavcodec/avcodec.h>
-    #include <libavutil/avutil.h>
-    #include <libavutil/imgutils.h>
-    #include <libavdevice/avdevice.h>
-    #include <libswscale/swscale.h>
-    #include <libavutil/time.h>
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/avutil.h>
+#include <libavutil/imgutils.h>
+#include <libavdevice/avdevice.h>
+#include <libswscale/swscale.h>
+#include <libavutil/time.h>
 }
 
-class NetworkManager
-{
+class NetworkManager {
 private:
     // Singleton
     NetworkManager() = default;
@@ -40,6 +38,10 @@ private:
     // Inner Field
     std::string ip_address = "";   // Server IP 주소 문자열
 
+    int width = 640;
+    int height = 480;
+    int frameRate = 10;
+
     AVFormatContext* output_ctx = nullptr;
     AVStream* video_stream = nullptr;
     AVCodecContext* codec_ctx = nullptr;
@@ -48,18 +50,14 @@ private:
     SwsContext* sws_ctx = nullptr;
 
     cv::VideoCapture cap;
-    cv::Mat image;
-
-    //스레드
-    std::thread sendThread;
 
     // Inner Functions
-    void configCodecParam(AVCodecContext* codec_ctx);
-    void setFrame(AVFrame* frame, AVCodecContext* codec_ctx);
-    void freeAllAV(AVFormatContext *output_ctx, AVFrame* frame,
-                   uint8_t *buffer, AVCodecContext *codec_ctx);
+    void configCodecParam();
+    void setFrame();
+    void freeAllAV();
     void openCamera();
     void sendImages();
+    void updateImage(cv::Mat& image, int imageCounter);
 
 public:
     // Singleton GetInstance()
@@ -73,22 +71,13 @@ public:
     // Funciton to get IP Address
     std::string get_ip_addr();
 
-    // Function to start MediaMTX server
+    // Function to start/stop MediaMTX server
     void startMediaMTX();
-
-    // Function to stop MediaMTX server
     void stopMediaMTX();
 
-    void setImage(const cv::Mat& img);
-
-    const cv::Mat& getImage() const;
-
     // Function for RTSP Streaming
-    void rtsp_streaming(const std::string& rtsp_url);
-
+    void startRTSP(const std::string& rtsp_url);
+    void stopRTSP();
 };
-
-// original main code
-int test_main();
 
 #endif // NETWORKMANAGER_H
