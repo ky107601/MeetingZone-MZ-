@@ -63,6 +63,7 @@ public:
     backgroundPicture picture;
     QLabel *chatBox;
 
+    QTcpSocket *tcpSocket; //클라이언트 소켓
     Mat recFrame;
 
 protected:
@@ -81,7 +82,7 @@ private:
     const std::string rtsp_url;
 
     QLabel *videoWindow; //비디오 출력 창
-    QTcpSocket *tcpSocket; //클라이언트 소켓
+
 
     // Widget()
     void startStreaming();
