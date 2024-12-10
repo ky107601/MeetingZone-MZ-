@@ -15,14 +15,22 @@ IS_RASPBERRY := $(shell cat /proc/cpuinfo | grep -c "Raspberry Pi")
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -O2 -I/server/nlohmann -I/server/include `pkg-config --cflags opencv4`
 LDFLAGS = -pthread \
-		   ./lib/libavdevice.a \
-		   ./lib/libavcodec.a \
-		   ./lib/libavfilter.a \
-           ./lib/libavformat.a \
-           ./lib/libavutil.a \
-           ./lib/libswscale.a \
-           ./lib/libswresample.a \
-		   `pkg-config --libs opencv4`
+	./lib/libavdevice.so \
+		   ./lib/libavcodec.so \
+		   ./lib/libavfilter.so \
+           ./lib/libavformat.so \
+           ./lib/libavutil.so \
+           ./lib/libswscale.so \
+           ./lib/libswresample.so \
+           `pkg-config --libs opencv4`
+#		   ./lib/libavdevice.a \
+#		   ./lib/libavcodec.a \
+#		   ./lib/libavfilter.a \
+#           ./lib/libavformat.a \
+#           ./lib/libavutil.a \
+#           ./lib/libswscale.a \
+#           ./lib/libswresample.a \
+#		   `pkg-config --libs opencv4`
         	# -lx264 -lx265 -lvpx -lfdk-aac -lmp3lame -lopus -lvorbis
 
 TARGET = server
@@ -45,20 +53,20 @@ update_config:
 	@echo "Update completed."
 
 # Create key and cert file
-KEY_FILE = server.key
-CRT_FILE = server.crt
+# KEY_FILE = server.key
+# CRT_FILE = server.crt
 
-check_certs: $(KEY_FILE) $(CRT_FILE)
+# check_certs: $(KEY_FILE) $(CRT_FILE)
 
-$(KEY_FILE):
-	@echo "Generating $(KEY_FILE)..."
-	openssl genrsa -out $(KEY_FILE) 2048
-	@echo "$(KEY_FILE) generated."
+# $(KEY_FILE):
+#	@echo "Generating $(KEY_FILE)..."
+#	openssl genrsa -out $(KEY_FILE) 2048
+#	@echo "$(KEY_FILE) generated."
 
-$(CRT_FILE): $(KEY_FILE)
-	@echo "Generating $(CRT_FILE)..."
-	openssl req -new -x509 -sha256 -key $(KEY_FILE) -out $(CRT_FILE) -days 3650
-	@echo "$(CRT_FILE) generated."
+# $(CRT_FILE): $(KEY_FILE)
+#	@echo "Generating $(CRT_FILE)..."
+#	openssl req -new -x509 -sha256 -key $(KEY_FILE) -out $(CRT_FILE) -days 3650
+#	@echo "$(CRT_FILE) generated."
 
 # Install MediaMTX for Raspberry Pi
 install_rpi:
@@ -87,8 +95,8 @@ install:
 	else \
 		echo "Unsupported OS: $(UNAME_S)"; exit 1; \
 	fi
-	$(MAKE) update_config;
-	$(MAKE) check_certs;
+	# $(MAKE) update_config;
+	# $(MAKE) check_certs;
 
 all: install $(TARGET)
 
