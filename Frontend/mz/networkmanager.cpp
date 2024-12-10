@@ -93,87 +93,87 @@ void NetworkManager::freeAllAV(AVFormatContext *output_ctx,
 
 void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     // Initialize FFmpeg
-    avformat_network_init();
+    // avformat_network_init();
 
-    // RTSP Output Context
-    AVFormatContext* output_ctx = nullptr;
-    AVStream* video_stream = nullptr;
+    // // RTSP Output Context
+    // AVFormatContext* output_ctx = nullptr;
+    // AVStream* video_stream = nullptr;
 
-    // Codec and codec context
-    const AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
-    if (!codec) {
-        std::cerr << "H.264 codec not found!" << std::endl;
-        return;
-    }
+    // // Codec and codec context
+    // const AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
+    // if (!codec) {
+    //     std::cerr << "H.264 codec not found!" << std::endl;
+    //     return;
+    // }
 
-    // Video codec context
-    AVCodecContext* codec_ctx = avcodec_alloc_context3(codec);
-    if (!codec_ctx) {
-        std::cerr << "Failed to allocate codec context!" << std::endl;
-        return;
-    }
+    // // Video codec context
+    // AVCodecContext* codec_ctx = avcodec_alloc_context3(codec);
+    // if (!codec_ctx) {
+    //     std::cerr << "Failed to allocate codec context!" << std::endl;
+    //     return;
+    // }
 
-    // Configure codec parameters
-    configCodecParam(codec_ctx);
+    // // Configure codec parameters
+    // configCodecParam(codec_ctx);
     
-    if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
-        std::cerr << "Failed to open codec!" << std::endl;
-        avcodec_free_context(&codec_ctx);
-        return;
-    }
+    // if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
+    //     std::cerr << "Failed to open codec!" << std::endl;
+    //     avcodec_free_context(&codec_ctx);
+    //     return;
+    // }
 
-    // Allocate frame and buffer
-    AVFrame* frame = av_frame_alloc();
-    if (!frame) {
-        std::cerr << "Failed to allocate frame!" << std::endl;
-        avcodec_free_context(&codec_ctx);
-        return;
-    }
-    setFrame(frame, codec_ctx);
+    // // Allocate frame and buffer
+    // AVFrame* frame = av_frame_alloc();
+    // if (!frame) {
+    //     std::cerr << "Failed to allocate frame!" << std::endl;
+    //     avcodec_free_context(&codec_ctx);
+    //     return;
+    // }
+    // setFrame(frame, codec_ctx);
 
-    int buffer_size = av_image_get_buffer_size(codec_ctx->pix_fmt, codec_ctx->width, codec_ctx->height, 1);
-    uint8_t* buffer = (uint8_t*)av_malloc(buffer_size);
-    av_image_fill_arrays(frame->data, frame->linesize, buffer, codec_ctx->pix_fmt, codec_ctx->width, codec_ctx->height, 1);
+    // int buffer_size = av_image_get_buffer_size(codec_ctx->pix_fmt, codec_ctx->width, codec_ctx->height, 1);
+    // uint8_t* buffer = (uint8_t*)av_malloc(buffer_size);
+    // av_image_fill_arrays(frame->data, frame->linesize, buffer, codec_ctx->pix_fmt, codec_ctx->width, codec_ctx->height, 1);
 
-    // Open output context
-    if (avformat_alloc_output_context2(&output_ctx, nullptr, "rtsp", rtsp_url.c_str()) < 0) {
-        std::cerr << "Failed to create output context!" << std::endl;
-        av_frame_free(&frame);
-        av_free(buffer);
-        avcodec_free_context(&codec_ctx);
-        return;
-    }
+    // // Open output context
+    // if (avformat_alloc_output_context2(&output_ctx, nullptr, "rtsp", rtsp_url.c_str()) < 0) {
+    //     std::cerr << "Failed to create output context!" << std::endl;
+    //     av_frame_free(&frame);
+    //     av_free(buffer);
+    //     avcodec_free_context(&codec_ctx);
+    //     return;
+    // }
 
-    video_stream = avformat_new_stream(output_ctx, nullptr);
-    if (!video_stream) {
-        std::cerr << "Failed to create video stream!" << std::endl;
-        freeAllAV(output_ctx, frame, buffer, codec_ctx);
-        return;
-    }
+    // video_stream = avformat_new_stream(output_ctx, nullptr);
+    // if (!video_stream) {
+    //     std::cerr << "Failed to create video stream!" << std::endl;
+    //     freeAllAV(output_ctx, frame, buffer, codec_ctx);
+    //     return;
+    // }
 
-    if (avcodec_parameters_from_context(video_stream->codecpar, codec_ctx) < 0) {
-        std::cerr << "Failed to copy codec parameters!" << std::endl;
-        freeAllAV(output_ctx, frame, buffer, codec_ctx);
-        return;
-    }
+    // if (avcodec_parameters_from_context(video_stream->codecpar, codec_ctx) < 0) {
+    //     std::cerr << "Failed to copy codec parameters!" << std::endl;
+    //     freeAllAV(output_ctx, frame, buffer, codec_ctx);
+    //     return;
+    // }
 
-    video_stream->time_base = codec_ctx->time_base;
+    // video_stream->time_base = codec_ctx->time_base;
 
-    if (!(output_ctx->oformat->flags & AVFMT_NOFILE)) {
-        if (avio_open(&output_ctx->pb, rtsp_url.c_str(), AVIO_FLAG_WRITE) < 0) {
-            std::cerr << "Failed to open RTSP output!" << std::endl;
-            freeAllAV(output_ctx, frame, buffer, codec_ctx);
-            return;
-        }
-    }
+    // if (!(output_ctx->oformat->flags & AVFMT_NOFILE)) {
+    //     if (avio_open(&output_ctx->pb, rtsp_url.c_str(), AVIO_FLAG_WRITE) < 0) {
+    //         std::cerr << "Failed to open RTSP output!" << std::endl;
+    //         freeAllAV(output_ctx, frame, buffer, codec_ctx);
+    //         return;
+    //     }
+    // }
 
-    if (avformat_write_header(output_ctx, nullptr) < 0) {
-        std::cerr << "Failed to write RTSP header!" << std::endl;
-        freeAllAV(output_ctx, frame, buffer, codec_ctx);
-        return;
-    }
+    // if (avformat_write_header(output_ctx, nullptr) < 0) {
+    //     std::cerr << "Failed to write RTSP header!" << std::endl;
+    //     freeAllAV(output_ctx, frame, buffer, codec_ctx);
+    //     return;
+    // }
 
-    std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
+    // std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
 
     // OpenCV camera capture
     cv::VideoCapture cap("libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 \
@@ -252,8 +252,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
   //  sws_freeContext(sws_ctx);
     cap.release();
 
-    // std::cout << "RTSP streaming stopped." << std::endl;
-    //~~
+    std::cout << "RTSP streaming stopped." << std::endl;
 }
 
 int test_main() {
