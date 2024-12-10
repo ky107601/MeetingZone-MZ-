@@ -39,12 +39,12 @@ std::string NetworkManager::get_ip_addr() {
     return ip_address; // IP 주소 반환
 }
 
-void setImage(const cv::Mat& img) { 
-    image = img; 
+void NetworkManager::setImage(const cv::Mat& img) {
+    image = img;
     return;
 }
 
-const cv::Mat& getImage() const { 
+const cv::Mat& NetworkManager::getImage() const {
     return image; 
 }
 
@@ -177,7 +177,7 @@ void NetworkManager::configCodecParam() {
     codec_ctx->width = 640;                              // 비디오 해상도 - 가로 640
     codec_ctx->height = 480;                             // 비디오 해상도 - 세로 480
     codec_ctx->time_base = AVRational{1, 10};            // 시간 베이스 (프레임 속도: 10 fps)
-    codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)
+    codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)00000
     codec_ctx->max_b_frames = 1;                         // 최대 B-프레임 수 (1개)
     codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;             // 픽셀 포맷을 YUV420P로 설정
     return;
@@ -192,6 +192,7 @@ void NetworkManager::setFrame() {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 void NetworkManager::freeAllAV(AVFormatContext *output_ctx, 
     AVFrame* frame, uint8_t *buffer, AVCodecContext *codec_ctx) {
 >>>>>>> 6ab4677 (refactoring)
@@ -204,6 +205,8 @@ void NetworkManager::getFrame() {
     return frame;
 }
 
+=======
+>>>>>>> 1e2b5bf (Fix minor error)
 void NetworkManager::freeAllAV() {
 >>>>>>> 8a92fc5 (networkManager 리팩토링)
     avformat_free_context(output_ctx);
@@ -213,6 +216,7 @@ void NetworkManager::freeAllAV() {
     return;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -226,6 +230,8 @@ void NetworkManager::openCamera() {
 =======
 
 >>>>>>> 8a92fc5 (networkManager 리팩토링)
+=======
+>>>>>>> 1e2b5bf (Fix minor error)
 void NetworkManager::openCamera() {
     // OpenCV camera capture
     std::string pipeline = "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 \
