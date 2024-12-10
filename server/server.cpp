@@ -44,7 +44,8 @@ void receive_frames(int client_sock, const string& ip)
 void send_merged_frames(int client_sock, const string& ip) {
 
     NetworkManager& networkManager = NetworkManager::getInstance();
-    networkManager.startRTSP(ip);
+    const std::string rtsp_url = "rtsp://" + networkManager.get_ip_addr() + ":8554/camera";
+    networkManager.startRTSP(rtsp_url);
 
     int frame_count = 0;
     int64_t pts = 0;
