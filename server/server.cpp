@@ -1,4 +1,5 @@
 #include "server.h"
+#include "networkmanager.h"
 extern Mat mergedFrame;
 
 void receive_frames(int client_sock, const string& ip)
@@ -41,13 +42,23 @@ void receive_frames(int client_sock, const string& ip)
 }
 
 void send_merged_frames(int client_sock, const string& ip) {
-    while(true){
+
+    NetworkManager& networkManager = NetworkManager::getInstance();
+    networkManager.startRTSP(ip);
+
+    int frame_count = 0;
+    int64_t pts = 0;
+    AVPacket *pkt;
+
+    while (true) {
         unique_lock<mutex> lock(queueMutex);
         if (mergedFrame.empty()) {
             lock.unlock();
             this_thread::sleep_for(chrono::milliseconds(100)); // 30 FPS 대기
             continue;
         }
+
+        networkManager.sendImage(mergedFrame, frame_count, pts, pkt);
 
         // 병합된 프레임을 JPEG로 인코딩
         vector<uchar> buffer;
@@ -78,3 +89,5 @@ void send_merged_frames(int client_sock, const string& ip) {
 
     close(client_sock);
 }
+
+

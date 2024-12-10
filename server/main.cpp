@@ -1,5 +1,5 @@
 #include "server.h"
-
+#include "networkmanager.h"
 
 int main() {
     int server_sock, client_sock,c;
@@ -20,7 +20,10 @@ int main() {
         cerr << "Bind 실패" << endl;
         return 1;
     }
+    
+    NetworkManager& networkManager = NetworkManager::getInstance();
 
+    networkManager.startMediaMTX();
     
     listen(server_sock, 3); // 수신대기
     cout << "연결을 기다리고 있습니다..." << endl;
@@ -39,8 +42,13 @@ int main() {
 
     if (client_sock < 0) {
         cerr << "연결 실패" << endl;
+        networkManager.stopRTSP();
+        networkManager.stopMediaMTX();
         return 1;
     }
+
+    networkManager.stopRTSP();
+    networkManager.stopMediaMTX();
 
     return 0;
 }
