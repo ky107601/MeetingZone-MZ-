@@ -123,6 +123,9 @@ target_link_libraries(mz
     swscale       # libswscale.so
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 376b8df (add x264)
     x264     
 
     # etc.
