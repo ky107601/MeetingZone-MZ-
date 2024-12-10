@@ -30,9 +30,11 @@ int main() {
 
     while ((client_sock = accept(server_sock, (struct sockaddr *)&client, (socklen_t*)&c))) {
         inet_ntop(AF_INET, &client.sin_addr, ip, INET_ADDRSTRLEN);
-        thread client_thread(handle_client, client_sock,ip);
+        thread client_thread(receive_frames, client_sock,ip);
+        thread send_thread(send_merged_frames, client_sock,ip);
         cout << "클라이언트 연결: " << ip << ":" << ntohs(client.sin_port) << endl;
         client_thread.detach();  // 클라이언트 요청을 새로운 스레드에서 처리
+        send_thread.detach();
     }
 
     if (client_sock < 0) {

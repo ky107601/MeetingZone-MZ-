@@ -32,9 +32,11 @@ extern condition_variable frameable;    // 프레임 추가 알림
 extern atomic<bool> stop;
 
 // 함수 선언
-void handle_client(int client_sock, const std::string& ip);
+void receive_frames(int client_sock, const string& ip);
+void send_merged_frames(int client_sock, const string& ip);
 void videothread(Mat& frame, queue<Mat>& frameQueue);
 void display_all_client(map<string, queue<Mat>>& frameQueues);
 void videoallplay(Mat& frame, const string& ip);
 Mat mergeFrames(map<string, queue<Mat>>& frameQueues);
+void servtocli(map<string, int>& client, map<string, queue<Mat>>& frameQueues);
 #endif // SERVER_H
