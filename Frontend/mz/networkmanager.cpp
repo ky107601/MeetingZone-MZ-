@@ -187,10 +187,10 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 
     cv::Mat image;
 
-    // SwsContext* sws_ctx = sws_getContext(
-    //     codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
-    //     codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
-    //     SWS_BILINEAR, nullptr, nullptr, nullptr);
+    SwsContext* sws_ctx = sws_getContext(
+        codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
+        codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
+        SWS_BILINEAR, nullptr, nullptr, nullptr);
 
     int frame_count = 0;
 

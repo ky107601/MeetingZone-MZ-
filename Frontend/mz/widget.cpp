@@ -14,7 +14,7 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     //this->showMaximized(); //full-size
 
-   // startStreaming();
+    //startStreaming();
     setUI();
     
     // string pipeline = setPipeline();
@@ -290,17 +290,19 @@ void Widget::setToggleVideo() {
             cam->setStyleSheet("background-color : white;");
             cam->show();
             //captureTimer->start(100);
-            width="640";
-            height="480";
-            string pipeline =
-                "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 "
-                "! video/x-raw,width="+width+",height="+height+",framerate=10/1,format=RGBx "
-                "! videoconvert ! videoscale ! appsink";
-            if(!cap.open(pipeline, CAP_GSTREAMER)) {
-                qDebug()<<"Failed to open the camera!";
-            }
-            sendVideo();
 
+            // width="640";
+            // height="480";
+            // string pipeline =
+            //     "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 "
+            //     "! video/x-raw,width="+width+",height="+height+",framerate=10/1,format=RGBx "
+            //     "! videoconvert ! videoscale ! appsink";
+            // if(!cap.open(pipeline, CAP_GSTREAMER)) {
+            //     qDebug()<<"Failed to open the camera!";
+            // }
+            // sendVideo();
+
+            startStreaming();
         }
         else            //status : video on -> off
         {
