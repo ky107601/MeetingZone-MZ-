@@ -35,11 +35,22 @@ private:
     // Inner Field
     std::string ip_address = "";   // Server IP 주소 문자열
 
+    AVFormatContext* output_ctx = nullptr;
+    AVStream* video_stream = nullptr;
+    AVCodecContext* codec_ctx = nullptr;
+    AVFrame* frame = nullptr;
+    uint8_t* buffer = nullptr;
+    SwsContext* sws_ctx = nullptr;
+
+    cv::VideoCapture cap;
+    cv::Mat image;
+
     // Inner Functions
-    void configCodecParam(AVCodecContext* codec_ctx);
-    void setFrame(AVFrame* frame, AVCodecContext* codec_ctx);
-    void freeAllAV(AVFormatContext *output_ctx, AVFrame* frame, 
-        uint8_t *buffer, AVCodecContext *codec_ctx);
+    void configCodecParam();
+    void setFrame();
+    void freeAllAV();
+    void openCamera();
+    void sendImages();
 
 public:
     // Singleton GetInstance()
@@ -58,6 +69,10 @@ public:
 
     // Function to stop MediaMTX server
     void stopMediaMTX();
+
+    void setImage(const cv::Mat& img);
+
+    const cv::Mat& getImage() const;
 
     // Function for RTSP Streaming
     void rtsp_streaming(const std::string& rtsp_url);
