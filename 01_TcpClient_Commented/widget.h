@@ -3,31 +3,42 @@
 
 #include <QWidget>
 #include <QTcpSocket>
+#include <QLabel>
 #include <opencv2/opencv.hpp>
+#include <thread>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class Widget; }
-QT_END_NAMESPACE
+    namespace Ui {
+    class Widget;
+}
 
 class Widget : public QWidget
 {
     Q_OBJECT
 
 public:
-    Widget(QWidget *parent = nullptr);
+    explicit Widget(QWidget *parent = nullptr);
     ~Widget();
-    QHostAddress getMyIP();
-private:
+
     Ui::Widget *ui;
-    QTcpSocket *tcpSocket;
+    QTcpSocket *tcpSocket;             // 서버와의 통신 소켓
+    QLabel *videoLabel;                // QLabel for displaying video frames
+    bool isVideoLabelInitialized = false; // QLabel 초기화 여부 체크
 
-    void initClnt();
+    std::thread sendThread;            // 송신 스레드
+    std::thread receiveThread;         // 수신 스레드
 
-private slots:
-    void slot_connectButton();
-    void slot_readMessage();
-    void slot_disconnected();
 
+    void initClnt();                // 클라이언트 초기화
+    QHostAddress getMyIP();            // 로컬 IP 주소 가져오기
+    void displayFrame(const cv::Mat &frame); // QLabel에 프레임 표시
+    QImage MatToQImage(const cv::Mat &mat);  // cv::Mat -> QImage 변환
+
+    void sendVideo();                  // 영상을 서버로 송신
+    void receiveVideo();               // 서버에서 영상 수신
+
+
+    void slot_connectButton();         // 연결 버튼 클릭 처리
+    void slot_disconnected();          // 서버 연결 종료 처리
 };
 
 #endif // WIDGET_H
