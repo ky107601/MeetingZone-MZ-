@@ -73,6 +73,8 @@ public:
 =======
 >>>>>>> 05136ac (clframe write & read)
 
+    Mat recFrame;
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;

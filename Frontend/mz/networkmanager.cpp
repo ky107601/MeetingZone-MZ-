@@ -14,28 +14,28 @@ void NetworkManager::set_ip_addr(std::string new_addr) {
 
 // Funciton to get IP Address
 std::string NetworkManager::get_ip_addr() {
-    struct ifaddrs *ifap = nullptr; // 네트워크 인터페이스 구조체 포인터
-    struct ifaddrs *i = nullptr;   // 순회용 포인터
-    void *src;                     // IP 주소 데이터의 시작 지점
+    // struct ifaddrs *ifap = nullptr; // 네트워크 인터페이스 구조체 포인터
+    // struct ifaddrs *i = nullptr;   // 순회용 포인터
+    // void *src;                     // IP 주소 데이터의 시작 지점
 
-    if (getifaddrs(&ifap) == 0) {  // 네트워크 인터페이스 목록 생성
-        for (i = ifap; i != nullptr; i = i->ifa_next) { // 인터페이스 순회
-            if (i->ifa_addr == nullptr) // 주소가 없는 인터페이스는 건너뜀
-                continue;
+    // if (getifaddrs(&ifap) == 0) {  // 네트워크 인터페이스 목록 생성
+    //     for (i = ifap; i != nullptr; i = i->ifa_next) { // 인터페이스 순회
+    //         if (i->ifa_addr == nullptr) // 주소가 없는 인터페이스는 건너뜀
+    //             continue;
 
-            // IPv4 주소만 처리
-            if (i->ifa_addr->sa_family == AF_INET) {
-                src = &((struct sockaddr_in *)i->ifa_addr)->sin_addr; // IPv4 주소 추출
-                char ip[INET_ADDRSTRLEN]; // IPv4 주소 문자열 버퍼
-                inet_ntop(AF_INET, src, ip, INET_ADDRSTRLEN); // 주소를 사람이 읽을 수 있는 문자열로 변환
-                ip_address = ip;
-                break; // 첫 번째 IP 주소를 가져오고 종료
-            }
-        }
-        if (ifap != nullptr) {
-            freeifaddrs(ifap); // 인터페이스 목록 메모리 해제
-        }
-    }
+    //         // IPv4 주소만 처리
+    //         if (i->ifa_addr->sa_family == AF_INET) {
+    //             src = &((struct sockaddr_in *)i->ifa_addr)->sin_addr; // IPv4 주소 추출
+    //             char ip[INET_ADDRSTRLEN]; // IPv4 주소 문자열 버퍼
+    //             inet_ntop(AF_INET, src, ip, INET_ADDRSTRLEN); // 주소를 사람이 읽을 수 있는 문자열로 변환
+    //             ip_address = ip;
+    //             break; // 첫 번째 IP 주소를 가져오고 종료
+    //         }
+    //     }
+    //     if (ifap != nullptr) {
+    //         freeifaddrs(ifap); // 인터페이스 목록 메모리 해제
+    //     }
+    // }
     return ip_address; // IP 주소 반환
 }
 
@@ -752,6 +752,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
         }
     }
 
+<<<<<<< HEAD
 =======
     if (!(output_ctx->oformat->flags & AVFMT_NOFILE)) {
         if (avio_open(&output_ctx->pb, rtsp_url.c_str(), AVIO_FLAG_WRITE) < 0) {
@@ -771,14 +772,19 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 >>>>>>> 376b8df (add x264)
 =======
 
+=======
+>>>>>>> 182b86b (receiving video)
     // if (avformat_write_header(output_ctx, nullptr) < 0) {
     //     std::cerr << "Failed to write RTSP header!" << std::endl;
     //     freeAllAV(output_ctx, frame, buffer, codec_ctx);
     //     return;
     // }
+<<<<<<< HEAD
 >>>>>>> c313804 (clframe write & read)
 =======
 >>>>>>> 9d292ba (add x264)
+=======
+>>>>>>> 182b86b (receiving video)
 
     sws_ctx = sws_getContext(
         codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
@@ -919,7 +925,7 @@ void NetworkManager::stopRTSP() {
 >>>>>>> 05136ac (clframe write & read)
 
 
-    std::cout << "RTSP streaming stopped." << std::endl;
+    //std::cout << "RTSP streaming stopped." << std::endl;
 
 }
 
