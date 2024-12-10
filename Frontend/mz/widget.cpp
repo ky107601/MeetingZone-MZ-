@@ -44,6 +44,9 @@ void Widget::connectServer()
 
     connect(tcpSocket, &QTcpSocket::connected, this, [this]() {
         qDebug() << "서버 연결됨";
+        qDebug() << "ui->inputServerAd = " <<ui->inputServerAd->text().toStdString();
+        networkManager.set_ip_addr(ui->inputServerAd->text().toStdString());
+        qDebug() <<"get ip = " << networkManager.get_ip_addr();
         ui->stackedWidget->setCurrentIndex(1);
         ui->inputServerAd->clear();
         ui->inputNickname->clear();
@@ -177,8 +180,10 @@ void Widget::startStreaming() {
     /* ========== NetworkManager ========== */
 
     //rtsp_url set_ip_addr로 설정
-    networkManager.set_ip_addr(ui->inputServerAd->text().toStdString());
+
+    qDebug() <<"ui->inpustServerAd->text().toStdString()" << ui->inputServerAd->text().toStdString();
     const std::string rtsp_url = "rtsps://" + networkManager.get_ip_addr() + ":8322/camera";
+    qDebug() <<"rtsp_url = " <<rtsp_url;
 
     // Register signal handler to clean up resources
     std::signal(SIGINT, [](int) {
@@ -351,7 +356,7 @@ void Widget::getVideo() {
         if (tcpSocket->bytesAvailable() < sizeof(frameSize)) {
             if (!tcpSocket->waitForReadyRead()) { // Wait for the frame size
                 cerr << "[ERROR] Waiting for frame size failed" << endl;
-                return;
+                //return;
             }
         }
         tcpSocket->read(reinterpret_cast<char*>(&frameSize), sizeof(frameSize));
@@ -373,7 +378,7 @@ void Widget::getVideo() {
 
         // 프레임 디코드
         vector<uchar> buffer(frameData.begin(), frameData.end());
-        Mat recFrame = imdecode(buffer, IMREAD_COLOR);
+        recFrame = imdecode(buffer, IMREAD_COLOR);
 
         // OpenCV 처리해야하는 부분
 
@@ -386,7 +391,7 @@ void Widget::getVideo() {
         QImage img((const uchar*)recFrame.data, recFrame.cols, recFrame.rows, recFrame.step, QImage::Format_RGB888);
         img = img.rgbSwapped(); // Convert BGR to RGB
 
-        videoWindow->setFixedSize(img.width() / 5, img.height() / 5);
+        //videoWindow->setFixedSize(img.width(), img.height());
         videoWindow->setPixmap(QPixmap::fromImage(img).scaled(videoWindow->size(), Qt::KeepAspectRatio));
 
         // 선택: Introduce a small delay for smoother playback
@@ -397,6 +402,7 @@ void Widget::getVideo() {
 void Widget::sendVideo()
 {
     qDebug() << tcpSocket->state();
+    /*
     while (tcpSocket->state() == QAbstractSocket::ConnectedState) {
 
         Mat frame;
@@ -430,4 +436,40 @@ void Widget::sendVideo()
         QCoreApplication::processEvents();
         cap.release();
     }
+
+    */
+    QString videoFilePath = "/home/pi/MeetingZone-MZ-/01_TcpClient_Commented/test1.mp4"; // 동영상 경로
+    cv::VideoCapture capture(videoFilePath.toStdString());
+    if (!capture.isOpened()) {
+        qDebug() << "[ERROR] 동영상을 열 수 없습니다:" << videoFilePath;
+        return;
+    }
+
+    while (tcpSocket->state() == QAbstractSocket::ConnectedState) {
+        cv::Mat frame;
+        if (!capture.read(frame)) {
+            qDebug() << "[INFO] 동영상 전송 완료.";
+            break;
+        }
+
+        // 프레임을 JPEG로 인코딩
+        std::vector<uchar> buffer;
+        cv::imencode(".jpg", frame, buffer);
+
+        // 크기 전송
+        qint64 frameSize = buffer.size();
+        tcpSocket->write(reinterpret_cast<const char*>(&frameSize), sizeof(frameSize));
+        tcpSocket->waitForBytesWritten();
+
+        // 데이터 전송
+        QByteArray frameData(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+        tcpSocket->write(frameData);
+        tcpSocket->waitForBytesWritten();
+
+        qDebug() << "[INFO] 프레임 전송 완료: 크기 =" << frameSize;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(33)); // 약 30 FPS
+    }
+
+    capture.release();
 }
