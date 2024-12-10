@@ -616,6 +616,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
         SWS_BILINEAR, nullptr, nullptr, nullptr);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
 
     openCamera();
@@ -639,6 +640,12 @@ void NetworkManager::stopRTSP() {
     //     codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
     //     codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
     //     SWS_BILINEAR, nullptr, nullptr, nullptr);
+=======
+    SwsContext* sws_ctx = sws_getContext(
+        codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
+        codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
+        SWS_BILINEAR, nullptr, nullptr, nullptr);
+>>>>>>> 232da33 (tmp)
 
 <<<<<<< HEAD
     // int frame_count = 0;
