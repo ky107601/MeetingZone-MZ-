@@ -41,7 +41,7 @@ void receive_frames(int client_sock, const string& ip)
 }
 
 void send_merged_frames(int client_sock, const string& ip) {
-    while (!stop.load()) {
+    while(true){
         unique_lock<mutex> lock(queueMutex);
         if (mergedFrame.empty()) {
             lock.unlock();
