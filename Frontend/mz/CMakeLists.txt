@@ -17,8 +17,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include/opencv4)
 
 # Find Qt and OpenCV packages
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network Concurrent)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network Concurrent)
 
 # Header & C++ Scripts
 set(PROJECT_SOURCES
@@ -56,6 +56,7 @@ target_link_libraries(mz
 
     # OpenCV
     opencv_core
+    opencv_imgcodecs
     opencv_imgproc
     opencv_highgui
     opencv_videoio
@@ -73,6 +74,9 @@ target_link_libraries(mz
     # etc.
     pthread                   # Required for FFmpeg and OpenCV
     m                         # Math library
+
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Concurrent
 )
 
 # Set macOS-specific properties (if applicable)

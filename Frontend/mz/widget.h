@@ -2,6 +2,8 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <QTcpSocket>
+#include <QHostAddress>
 #include <QIcon>
 #include <opencv4/opencv2/opencv.hpp>
 #include <opencv4/opencv2/highgui.hpp>
@@ -12,6 +14,7 @@
 #include <QTimer>
 #include <QEvent>
 #include <QString>
+#include <QByteArray>
 #include <QHBoxLayout>
 #include "camviewer.h"
 #include "backgroundpicture.h"
@@ -21,6 +24,8 @@
 #include <QMouseEvent>
 #include <QPixmap>
 #include <QFileDialog>
+#include <QAbstractSocket>
+#include <QtConcurrent>
 
 #include "networkmanager.h"
 
@@ -56,19 +61,25 @@ public:
     string width, height;
 
     backgroundPicture picture;
+    QLabel *chatBox;
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
 
 public slots:
+    void connectServer();
     void changeIcon();
     void updateFrame();
     void selectPicture();
 
 private:
     Ui::Widget *ui;
+    NetworkManager& networkManager = NetworkManager::getInstance();
     const std::string rtsp_url;
+
+    QLabel *videoWindow; //비디오 출력 창
+    QTcpSocket *tcpSocket; //클라이언트 소켓
 
     // Widget()
     void startStreaming();
@@ -81,5 +92,7 @@ private:
 
     // updateFrame()
     Mat& captureNewFrame();
+    void getVideo();
+    void sendVideo();
 };
 #endif // WIDGET_H
