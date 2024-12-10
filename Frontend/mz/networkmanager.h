@@ -132,14 +132,10 @@ private:
     cv::VideoCapture cap;
     cv::Mat image;
 
-    //스레드
-    std::thread sendThread;
-
     // Inner Functions
-    void configCodecParam(AVCodecContext* codec_ctx);
-    void setFrame(AVFrame* frame, AVCodecContext* codec_ctx);
-    void freeAllAV(AVFormatContext *output_ctx, AVFrame* frame,
-                   uint8_t *buffer, AVCodecContext *codec_ctx);
+    void configCodecParam();
+    void setFrame();
+    void freeAllAV();
     void openCamera();
     void sendImages();
 

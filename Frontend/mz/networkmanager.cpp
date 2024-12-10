@@ -39,12 +39,12 @@ std::string NetworkManager::get_ip_addr() {
     return ip_address; // IP 주소 반환
 }
 
-void NetworkManager::setImage(const cv::Mat& img) {
-    image = img;
+void setImage(const cv::Mat& img) { 
+    image = img; 
     return;
 }
 
-const cv::Mat& NetworkManager::getImage() const {
+const cv::Mat& getImage() const { 
     return image; 
 }
 
@@ -144,6 +144,7 @@ void NetworkManager::stopMediaMTX() {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 void NetworkManager::configCodecParam() {
     codec_ctx->codec_id = AV_CODEC_ID_H264;              // 코덱 ID를 H.264로 설정
     codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;          // 미디어 타입을 비디오로 설정
@@ -167,25 +168,29 @@ void NetworkManager::setFrame() {
 void NetworkManager::freeAllAV() {
 =======
 void NetworkManager::configCodecParam(AVCodecContext* codec_ctx) {
+=======
+void NetworkManager::configCodecParam() {
+>>>>>>> 8a92fc5 (networkManager 리팩토링)
     codec_ctx->codec_id = AV_CODEC_ID_H264;              // 코덱 ID를 H.264로 설정
     codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;          // 미디어 타입을 비디오로 설정
     codec_ctx->bit_rate = 400000;                        // 비트레이트 설정 (400 kbps)
     codec_ctx->width = 640;                              // 비디오 해상도 - 가로 640
     codec_ctx->height = 480;                             // 비디오 해상도 - 세로 480
-    codec_ctx->time_base = AVRational{1, 25};            // 시간 베이스 (프레임 속도: 10 fps)
-    codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)00000
+    codec_ctx->time_base = AVRational{1, 10};            // 시간 베이스 (프레임 속도: 10 fps)
+    codec_ctx->gop_size = 10;                            // GOP(Group of Pictures) 크기 설정 (10 프레임마다 키프레임 생성)
     codec_ctx->max_b_frames = 1;                         // 최대 B-프레임 수 (1개)
     codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;             // 픽셀 포맷을 YUV420P로 설정
     return;
 }
 
-void NetworkManager::setFrame(AVFrame* frame, AVCodecContext* codec_ctx) {
+void NetworkManager::setFrame() {
     frame->format = codec_ctx->pix_fmt;   // 프레임의 픽셀 포맷 설정
     frame->width = codec_ctx->width;     // 프레임의 가로 해상도 설정
     frame->height = codec_ctx->height;   // 프레임의 세로 해상도 설정
     return;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 void NetworkManager::freeAllAV(AVFormatContext *output_ctx, 
     AVFrame* frame, uint8_t *buffer, AVCodecContext *codec_ctx) {
@@ -194,6 +199,13 @@ void NetworkManager::freeAllAV(AVFormatContext *output_ctx,
 void NetworkManager::freeAllAV(AVFormatContext *output_ctx,
                                AVFrame* frame, uint8_t *buffer, AVCodecContext *codec_ctx) {
 >>>>>>> 3a9080f (update)
+=======
+void NetworkManager::getFrame() {
+    return frame;
+}
+
+void NetworkManager::freeAllAV() {
+>>>>>>> 8a92fc5 (networkManager 리팩토링)
     avformat_free_context(output_ctx);
     av_frame_free(&frame);
     av_free(buffer);
@@ -203,6 +215,7 @@ void NetworkManager::freeAllAV(AVFormatContext *output_ctx,
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 void NetworkManager::openCamera() {
     // OpenCV camera capture
     std::string pipeline =
@@ -210,6 +223,9 @@ void NetworkManager::openCamera() {
         + std::to_string(width) + ",height=" + std::to_string(height) + ",framerate=" + std::to_string(frameRate)
         + "/1,format=RGBx ! videoconvert ! videoscale ! appsink";
 =======
+=======
+
+>>>>>>> 8a92fc5 (networkManager 리팩토링)
 void NetworkManager::openCamera() {
     // OpenCV camera capture
     std::string pipeline = "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 \
@@ -221,10 +237,14 @@ void NetworkManager::openCamera() {
     if (!cap.isOpened()) {
         std::cerr << "Failed to open camera!" << std::endl;
 <<<<<<< HEAD
+<<<<<<< HEAD
         freeAllAV();
 =======
         freeAllAV(output_ctx, frame, buffer, codec_ctx);
 >>>>>>> 3a9080f (update)
+=======
+        freeAllAV();
+>>>>>>> 8a92fc5 (networkManager 리팩토링)
         return;
     }
 }
@@ -295,8 +315,11 @@ void NetworkManager::sendImages() {
 
     while (cap.read(image)) {
         // Convert to YUV format
+<<<<<<< HEAD
         qDebug() << "sendImages()";
 >>>>>>> 3a9080f (update)
+=======
+>>>>>>> 8a92fc5 (networkManager 리팩토링)
         const uint8_t* data[1] = {image.data};
         int linesize[1] = {static_cast<int>(image.step[0])};
         sws_scale(sws_ctx, data, linesize, 0, codec_ctx->height, frame->data, frame->linesize);
@@ -358,7 +381,7 @@ void NetworkManager::sendImages() {
                             std::cerr << "Error writing frame: " << errbuf << std::endl;
                         }
                     }
-
+                    
                     av_packet_unref(pkt);
                 } else if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     break;
@@ -391,6 +414,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     // Initialize FFmpeg
     avformat_network_init();
 
+<<<<<<< HEAD
     // RTSP Output Context
     output_ctx = nullptr;
     video_stream = nullptr;
@@ -409,6 +433,8 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     // Codec and codec context
 >>>>>>> 9d292ba (add x264)
 =======
+=======
+>>>>>>> 8a92fc5 (networkManager 리팩토링)
     // Video codec
 >>>>>>> 3a9080f (update)
     const AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
@@ -510,7 +536,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     }
 
     // Configure codec parameters
-    configCodecParam(codec_ctx);
+    configCodecParam();
     
     if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
         std::cerr << "Failed to open codec!" << std::endl;
@@ -525,7 +551,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
         avcodec_free_context(&codec_ctx);
         return;
     }
-    setFrame(frame, codec_ctx);
+    setFrame();
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -618,7 +644,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     video_stream = avformat_new_stream(output_ctx, nullptr);
     if (!video_stream) {
         std::cerr << "Failed to create video stream!" << std::endl;
-        freeAllAV(output_ctx, frame, buffer, codec_ctx);
+        freeAllAV();
         return;
     }
 
@@ -633,7 +659,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 >>>>>>> 9d292ba (add x264)
     if (avcodec_parameters_from_context(video_stream->codecpar, codec_ctx) < 0) {
         std::cerr << "Failed to copy codec parameters!" << std::endl;
-        freeAllAV(output_ctx, frame, buffer, codec_ctx);
+        freeAllAV();
         return;
     }
 <<<<<<< HEAD
@@ -715,7 +741,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
     if (!(output_ctx->oformat->flags & AVFMT_NOFILE)) {
         if (avio_open(&output_ctx->pb, rtsp_url.c_str(), AVIO_FLAG_WRITE) < 0) {
             std::cerr << "Failed to open RTSP output!" << std::endl;
-            freeAllAV(output_ctx, frame, buffer, codec_ctx);
+            freeAllAV();
             return;
         }
     }
@@ -732,7 +758,7 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 >>>>>>> 9d292ba (add x264)
     if (avformat_write_header(output_ctx, nullptr) < 0) {
         std::cerr << "Failed to write RTSP header!" << std::endl;
-        freeAllAV(output_ctx, frame, buffer, codec_ctx);
+        freeAllAV();
         return;
     }
 <<<<<<< HEAD
@@ -748,10 +774,16 @@ void NetworkManager::rtsp_streaming(const std::string& rtsp_url) {
 =======
 >>>>>>> 9d292ba (add x264)
 
+    sws_ctx = sws_getContext(
+        codec_ctx->width, codec_ctx->height, AV_PIX_FMT_BGR24,
+        codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
+        SWS_BILINEAR, nullptr, nullptr, nullptr);
+
+
     std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
 
     openCamera();
-    sendThread = std::thread(&NetworkManager::sendImages, this);
+    sendImages();
 
 <<<<<<< HEAD
     cv::Mat image;
@@ -874,9 +906,9 @@ void NetworkManager::stopRTSP() {
 =======
 >>>>>>> 3a9080f (update)
     // Cleanup
-    // av_write_trailer(output_ctx);
-    // freeAllAV();
-    // sws_freeContext(sws_ctx);
+    av_write_trailer(output_ctx);
+    freeAllAV();
+    sws_freeContext(sws_ctx);
     cap.release();
 >>>>>>> 05136ac (clframe write & read)
 
