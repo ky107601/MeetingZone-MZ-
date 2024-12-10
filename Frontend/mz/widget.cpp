@@ -48,11 +48,15 @@ void Widget::connectServer()
         ui->inputServerAd->clear();
         ui->inputNickname->clear();
 
-        QtConcurrent::run([this](){getVideo();}); //카메라 on/off와 상관없이 항상 받아옴
+        QtConcurrent::run([this]()
+        {
+            getVideo(); //카메라 on/off와 상관없이 항상 받아옴
+        });
     });
 
     connect(tcpSocket, &QTcpSocket::errorOccurred, this, [this]() {
         QMessageBox::warning(this, "실패", "서버 연결에 실패하였습니다.", QMessageBox::Ok);
+        ui->stackedWidget->setCurrentIndex(0);
     });
 }
 
@@ -136,7 +140,7 @@ void Widget::keyPressEvent(QKeyEvent *event)
     }
     else //enter : 16777220
     {
-        qDebug()<<"key = " <<event->key();
+        qDebug() << "key = " << event->key();
         if(event->key() == 16777220 || event->key() == 16777221)
         {
             // 여기서 채팅 보내야 함
