@@ -34,33 +34,6 @@ void display_all_client(map<string, queue<Mat>>& frameQueues) {
     destroyWindow("Merged Frames");
 }
 
-// 병합된 프레임을 모든 클라이언트에 전송
-// void servtocli(map<string, int>& client, map<string, queue<Mat>>& frameQueues) {
-//     Mat mergedFrame = mergeFrames(frameQueues);
-//     if (!mergedFrame.empty()) {
-//         vector<uchar> buffer;
-//         imencode(".jpg", mergedFrame, buffer);
-
-//         int64_t frameSize = buffer.size();
-
-//         for (auto& [ip, socket] : client) {
-//             if (socket > 0) { // 유효한 소켓 디스크립터인지 확인
-//                 // 프레임 크기 전송
-//                 if (write(socket, reinterpret_cast<const char*>(&frameSize), sizeof(frameSize)) == -1) {
-//                     cerr << "[ERROR] 프레임 크기 전송 실패 (IP: " << ip << ")" << endl;
-//                     continue;
-//                 }
-
-//                 // 프레임 데이터 전송
-//                 if (write(socket, reinterpret_cast<const char*>(buffer.data()), buffer.size()) == -1) {
-//                     cerr << "[ERROR] 프레임 데이터 전송 실패 (IP: " << ip << ")" << endl;
-//                 } else {
-//                     cout << "[INFO] 병합된 프레임 전송 성공 (IP: " << ip << ", 크기: " << frameSize << ")" << endl;
-//                 }
-//             }
-//         }
-//     }
-// }
 
 // 클라이언트별 프레임을 처리하고 병합된 프레임 디스플레이
 void videoallplay(Mat& frame, const string& ip) {
@@ -88,10 +61,6 @@ void videoallplay(Mat& frame, const string& ip) {
             display_all_client(frameQueues);
         });
     }
-
-    // // 병합된 프레임을 클라이언트로 전송
-    // static map<string, int> client; // 클라이언트별 소켓 디스크립터 관리
-    // servtocli(client, frameQueues);
 
     // 스레드 종료 관리
     for (auto& thread : threads) {
