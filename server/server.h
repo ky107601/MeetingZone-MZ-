@@ -29,7 +29,6 @@ using namespace cv;
 // 전역 변수
 extern mutex queueMutex;                     // 큐 접근 보호를 위한 뮤텍스
 extern condition_variable frameable;    // 프레임 추가 알림
-extern atomic<bool> stop;
 
 // 함수 선언
 void receive_frames(int client_sock, const string& ip);
