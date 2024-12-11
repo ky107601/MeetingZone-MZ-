@@ -23,6 +23,8 @@ Widget::Widget(QWidget *parent)
     //setTimerForFrame();
     setToggleVideo();
     setBackground();
+
+    NetworkManager::getInstance().startMediaMTX();
 }
 
 Widget::~Widget()
@@ -196,7 +198,7 @@ void Widget::startStreaming() {
     });
 
     // Start MediaMTX server
-    networkManager.startMediaMTX();
+    // networkManager.startMediaMTX();
 
     // Start RTSP streaming in a separate thread
     std::thread streaming_thread(&NetworkManager::startRTSP, &networkManager, rtsp_url);
