@@ -43,9 +43,9 @@
 	
  **카메라 상태**
  
-	| On | Off |
-	|-----|-----|
-	| <img src="Frontend/mz/resources/video_on.png" style="width:80px;"/> | <img src="Frontend/mz/resources/video_off.png" style="width:80px;"/> |
+| On | Off |
+|-----|-----|
+| <img src="Frontend/mz/resources/video_on.png" style="width:80px;"/> | <img src="Frontend/mz/resources/video_off.png" style="width:80px;"/> |
 	
 2. 왼쪽 가장 위에 출력되는 영상의 위치를 **키보드의 방향키**나 **마우스로 드래그**하여 화면 내에서 **이동**할 수 있습니다.
 		
@@ -55,9 +55,10 @@
 
 #### 회의 배경 변경
 
-	| 교체 버튼 | 추가 버튼 |
-	|-----|-----|
-	| <img src="Frontend/mz/resources/change.png" style="width:80px;"/> | <img src="Frontend/mz/resources/plus.png" style="width:80px;"/> |
+| 교체 버튼 | 추가 버튼 |
+|-----|-----|
+| <img src="Frontend/mz/resources/change.png" style="width:80px;"/> | <img src="Frontend/mz/resources/plus.png" style="width:80px;"/> |
+
 1. **교체 버튼**을 클릭하여 기본 배경 중에서 원하는 배경을 선택할 수 있습니다.
 2. **추가 버튼**을 클릭하여 원하는 이미지 파일을 로컬에서 선택할 수 있습니다.
 
