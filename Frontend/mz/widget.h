@@ -26,6 +26,7 @@
 #include <QFileDialog>
 #include <QAbstractSocket>
 #include <QtConcurrent>
+#include <thread>
 
 #include "networkmanager.h"
 
@@ -65,6 +66,9 @@ public:
 
     QTcpSocket *tcpSocket; //클라이언트 소켓
     Mat recFrame;
+
+    std::thread sendThread;
+    std::thread recThread;
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
