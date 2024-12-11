@@ -42,9 +42,13 @@ void videoallplay(Mat& frame, const string& ip) {
     static mutex localMutex;
 
     // 클라이언트별 프레임 큐 초기화
-    if (frameQueues.find(ip) == frameQueues.end()) {
-        lock_guard<mutex> lock(localMutex);
-        frameQueues[ip] = queue<Mat>();
+     if (frameQueues.find(ip) == frameQueues.end()) {
+        frameQueues[ip] = queue<cv::Mat>();
+    }
+
+    // 큐 크기가 최대 크기를 초과하면 오래된 프레임 제거
+    if (frameQueues[ip].size() >= 3) {
+        frameQueues[ip].pop(); // 가장 오래된 프레임 제거
     }
 
     // 클라이언트 프레임 추가
@@ -67,9 +71,9 @@ void videoallplay(Mat& frame, const string& ip) {
 
 // 프레임 병합 함수
 Mat mergeFrames(map<string, queue<Mat>>& frameQueues) {
-    int cols = 2;
-    // int rows = (frameQueues.size() + cols - 1) / cols;
-    int rows = 2;
+    int clientCount = frameQueues.size();
+    int cols = clientCount;       
+    int rows = 1;                 
     int width = 320, height = 240;
 
     // mergedFrame = Mat::zeros(rows * height, cols * width, CV_8UC3);
@@ -93,7 +97,7 @@ Mat mergeFrames(map<string, queue<Mat>>& frameQueues) {
         Mat resizedFrame;
         resize(frame, resizedFrame, Size(width, height));
 
-        int x = (i % cols) * width;
+        int x = (i % cols) * width; 
         int y = (i / cols) * height;
 
         resizedFrame.copyTo(mergedFrame(Rect(x, y, width, height)));

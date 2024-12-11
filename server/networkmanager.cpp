@@ -40,7 +40,7 @@ void NetworkManager::startMediaMTX() {
     // Command to start MediaMTX (adjust path as needed) | MediaMTX 서버 실행
     int result = std::system("./mediamtx &");
     if (result != 0) {
-        std::cerr << "Failed to start MediaMTX. Please ensure it's installed and accessible." << std::endl;
+        //std::cerr << "Failed to start MediaMTX. Please ensure it's installed and accessible." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -58,7 +58,7 @@ void NetworkManager::stopMediaMTX() {
     if (result != 0) {
         std::cerr << "Failed to stop MediaMTX. Please check manually." << std::endl;
     } else {
-        std::cout << "MediaMTX server stopped successfully." << std::endl;
+        //std::cout << "MediaMTX server stopped successfully." << std::endl;
     }
 }
 
@@ -111,7 +111,7 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts) {
             pkt->stream_index = video_stream->index;
             pkt->pts = pkt->dts = frame_count++;
 
-            std::cout << "PTS: " << pkt->pts << std::endl;
+            //std::cout << "PTS: " << pkt->pts << std::endl;
 
             // 패킷 쓰기 전 추가 검사
             if (pkt->pts >= 0) {
@@ -120,7 +120,7 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts) {
                 if (ret < 0) {
                     char errbuf[AV_ERROR_MAX_STRING_SIZE];
                     av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-                    std::cerr << "Error writing frame: " << errbuf << std::endl;
+                    //std::cerr << "Error writing frame: " << errbuf << std::endl;
                 }
             }
             
@@ -130,7 +130,7 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts) {
         } else {
             char errbuf[AV_ERROR_MAX_STRING_SIZE];
             av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-            std::cerr << "Error encoding frame: " << errbuf << std::endl;
+            //std::cerr << "Error encoding frame: " << errbuf << std::endl;
             break;
         }
     }
@@ -194,7 +194,7 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
 
     // Open output context
     if (avformat_alloc_output_context2(&output_ctx, nullptr, "rtsp", rtsp_url.c_str()) < 0) {
-        std::cerr << "Failed to create output context!" << std::endl;
+        //std::cerr << "Failed to create output context!" << std::endl;
         av_frame_free(&frame);
         av_free(buffer);
         avcodec_free_context(&codec_ctx);
@@ -203,13 +203,13 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
 
     video_stream = avformat_new_stream(output_ctx, nullptr);
     if (!video_stream) {
-        std::cerr << "Failed to create video stream!" << std::endl;
+        //std::cerr << "Failed to create video stream!" << std::endl;
         freeAllAV();
         return;
     }
 
     if (avcodec_parameters_from_context(video_stream->codecpar, codec_ctx) < 0) {
-        std::cerr << "Failed to copy codec parameters!" << std::endl;
+        //std::cerr << "Failed to copy codec parameters!" << std::endl;
         freeAllAV();
         return;
     }
@@ -235,7 +235,7 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
         codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
         SWS_BILINEAR, nullptr, nullptr, nullptr);
 
-    std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
+    //std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
 }
 
 
