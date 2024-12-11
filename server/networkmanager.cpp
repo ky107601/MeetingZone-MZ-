@@ -141,9 +141,10 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, A
 void NetworkManager::startRTSP(const std::string& rtsp_url) {
     // Initialize FFmpeg
     avformat_network_init();
+    
 
     // Video codec
-    const AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
+    const AVCodec* codec = avcodec_find_encoder_by_name("libx264");
     if (!codec) {
         std::cerr << "H.264 codec not found!" << std::endl;
         return;
@@ -159,6 +160,18 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
     // Configure codec parameters
     configCodecParam();
     
+    // AVDictionary* options = nullptr;
+    // av_dict_set(&options, "preset", "fast", 0);     // 인코딩 속도
+    // av_dict_set(&options, "tune", "zerolatency", 0); // 실시간 스트리밍 용도
+    // av_dict_set(&options, "profile", "high", 0);   // H.264 High 프로필
+
+    // if (avcodec_open2(codec_ctx, codec, &options) < 0) {
+    //     std::cerr << "Failed to open codec!" << std::endl;
+    //     avcodec_free_context(&codec_ctx);
+    //     return;
+    // }
+    // av_dict_free(&options);
+
     if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
         std::cerr << "Failed to open codec!" << std::endl;
         avcodec_free_context(&codec_ctx);
