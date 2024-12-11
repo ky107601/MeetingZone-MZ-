@@ -13,30 +13,22 @@ IS_RASPBERRY := $(shell cat /proc/cpuinfo | grep -c "Raspberry Pi")
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -O2 -I/server/nlohmann -I/server/include `pkg-config --cflags opencv4`
+CXXFLAGS = -std=c++17 -Wall -O2 -I./nlohmann -I./include `pkg-config --cflags opencv4`
 LDFLAGS = -pthread \
 	./lib/libavdevice.so \
-		   ./lib/libavcodec.so \
-		   ./lib/libavfilter.so \
-           ./lib/libavformat.so \
-           ./lib/libavutil.so \
-           ./lib/libswscale.so \
-           ./lib/libswresample.so \
-           `pkg-config --libs opencv4`
-#		   ./lib/libavdevice.a \
-#		   ./lib/libavcodec.a \
-#		   ./lib/libavfilter.a \
-#           ./lib/libavformat.a \
-#           ./lib/libavutil.a \
-#           ./lib/libswscale.a \
-#           ./lib/libswresample.a \
-#		   `pkg-config --libs opencv4`
-        	# -lx264 -lx265 -lvpx -lfdk-aac -lmp3lame -lopus -lvorbis
+	./lib/libavcodec.so \
+	./lib/libavfilter.so \
+	./lib/libavformat.so \
+	./lib/libavutil.so \
+	./lib/libswscale.so \
+	./lib/libswresample.so \
+	`pkg-config --libs opencv4`
+	
+# -lx264 -lx265 -lvpx -lfdk-aac -lmp3lame -lopus -lvorbis
 
 TARGET = server
 SRCS = server.cpp main.cpp video.cpp networkmanager.cpp
 OBJS = $(SRCS:.cpp=.o)
-
 
 # Update specific values of YAML file
 YAML_FILE = mediamtx.yml
