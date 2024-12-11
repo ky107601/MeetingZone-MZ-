@@ -1,6 +1,6 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=FA4032&height=200&section=header&text=MeetingZone-MZ-&fontSize=75&fontColor=ffffff" />
 
-**MZ** 는 다중 영상 채팅 프로그램으로, 자신의 영상을 원하는 좌표로 이동할 수 있는 것이 특징입니다. 
+**MZ** 는 다중 화상 채팅 프로그램으로, 자신의 영상을 이동시킬 수 있다는 점이 특징입니다. 
 
   
 ## :clock2:개발 기간
@@ -46,11 +46,11 @@
 | <img src="Frontend/mz/resources/video_on.png" style="width:50px;"/> | <img src="Frontend/mz/resources/video_off.png" style="width:50px;"/> |
 
 1. 화면의 하단에 있는 비디오 이미지를 클릭하여 카메라를 사용 및 중단 합니다.
-2. 왼쪽 가장 위에 출력되는 영상의 위치를 **키보드의 방향키**나 **마우스로 드래그**하여 화면 내에서 **이동**할 수 있습니다.
+2. **키보드의 방향키**를 누르거나 **마우스로 드래그**하여 영상 위치를 화면 내에서 **이동**할 수 있습니다.
 		
 #### 채팅 입력
 1. 가장 하단에 있는 채팅 창에 텍스트를 입력하고 **Enter** 키로 텍스트를 전송합니다.
-2. 전송된 텍스트는 다른 모든 사용자의 채팅과 함께 회의 하면 좌측 하단에 표시됩니다.
+2. 전송된 텍스트는 다른 모든 사용자의 채팅과 함께 회의 화면 좌측 하단에 표시됩니다.
 
 #### 회의 배경 변경
 
