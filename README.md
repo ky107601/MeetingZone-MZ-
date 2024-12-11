@@ -43,7 +43,7 @@
 	**카메라 상태**
 	| On | Off |
 	|-----|-----|
-	| <img src="Frontend/mz/resources/video_on.png"/> | <img src="Frontend/mz/resources/video_off.png"/> |
+	| <img src="Frontend/mz/resources/video_on.png" style="width:80px;"/> | <img src="Frontend/mz/resources/video_off.png" style="width:80px;"/> |
 	
 2. 왼쪽 가장 위에 출력되는 영상의 위치를 **키보드의 방향키**나 **마우스로 드래그**하여 화면 내에서 **이동**할 수 있습니다.
 		
