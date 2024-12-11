@@ -26,11 +26,7 @@
 #include <QFileDialog>
 #include <QAbstractSocket>
 #include <QtConcurrent>
-<<<<<<< HEAD
-
-#include "networkmanager.h"
-=======
->>>>>>> 05136ac (clframe write & read)
+#include <thread>
 
 #include "networkmanager.h"
 
@@ -67,15 +63,6 @@ public:
 
     backgroundPicture picture;
     QLabel *chatBox;
-<<<<<<< HEAD
-
-    Mat recFrame;
-=======
->>>>>>> 05136ac (clframe write & read)
-
-    Mat recFrame;
-=======
->>>>>>> 05136ac (clframe write & read)
 
     QTcpSocket *tcpSocket; //클라이언트 소켓
     Mat recFrame;
