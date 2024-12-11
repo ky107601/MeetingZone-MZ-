@@ -41,8 +41,8 @@
 #### 카메라 사용
 1. 화면의 하단에 있는 비디오 이미지를 클릭하여 카메라를 사용 및 중단 합니다.
 	
- 
  **카메라 상태**
+ 
 	| On | Off |
 	|-----|-----|
 	| <img src="Frontend/mz/resources/video_on.png" style="width:80px;"/> | <img src="Frontend/mz/resources/video_off.png" style="width:80px;"/> |
@@ -54,6 +54,7 @@
 2. 전송된 텍스트는 다른 모든 사용자의 채팅과 함께 회의 하면 좌측 하단에 표시됩니다.
 
 #### 회의 배경 변경
+
 	| 교체 버튼 | 추가 버튼 |
 	|-----|-----|
 	| <img src="Frontend/mz/resources/change.png" style="width:80px;"/> | <img src="Frontend/mz/resources/plus.png" style="width:80px;"/> |
