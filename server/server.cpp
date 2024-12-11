@@ -10,6 +10,7 @@ void receive_frames(int client_sock, const string& ip)
     int64 frameSize = 0;
 
     while (true) {
+        std::cout << "Received frames!!!!!!" << std::endl;
         // 프레임 크기 수신
         if (recv(client_sock, reinterpret_cast<char*>(&frameSize), sizeof(frameSize), 0) <= 0) {
             cout << "클라이언트 연결 종료 (" << ip << ")" << endl;
@@ -49,17 +50,17 @@ void send_merged_frames(int client_sock, const string& ip) {
 
     int frame_count = 0;
     int64_t pts = 0;
-    AVPacket *pkt;
 
     while (true) {
         unique_lock<mutex> lock(queueMutex);
         if (mergedFrame.empty()) {
+            std::cout << "Frame Empty !!!" << std::endl;
             lock.unlock();
             this_thread::sleep_for(chrono::milliseconds(100)); // 30 FPS 대기
             continue;
         }
-
-        networkManager.sendImage(mergedFrame, frame_count, pts, pkt);
+        std::cout << "Send Image !!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        networkManager.sendImage(mergedFrame, frame_count, pts);
 
         // 병합된 프레임을 JPEG로 인코딩
         vector<uchar> buffer;
