@@ -21,15 +21,6 @@ HEADERS += \
 FORMS += \
         widget.ui
 
-# Include OpenCV
-INCLUDEPATH += /usr/include/opencv4
-LIBS += -L/usr/lib \
-        -lopencv_core \
-        -lopencv_imgproc \
-        -lopencv_highgui \
-        -lopencv_videoio \
-        -lopencv_imgcodecs
-
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

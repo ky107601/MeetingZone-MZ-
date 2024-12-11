@@ -14,7 +14,7 @@ int main() {
 
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(8080);
+    server.sin_port = htons(8888);
 
     if (bind(server_sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
         cerr << "Bind 실패" << endl;
