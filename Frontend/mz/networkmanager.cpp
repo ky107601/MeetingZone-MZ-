@@ -1,8 +1,8 @@
 #include "networkmanager.h"
 
 // Function to set IP Address
-void NetworkManager::set_ip_addr(std::string new_addr) {
-    ip_address = new_addr;
+void NetworkManager::set_linux_ip_addr(std::string new_addr) {
+    linux_ip = new_addr;
     return;
 }
 
@@ -22,7 +22,7 @@ std::string NetworkManager::get_ip_addr() {
                 src = &((struct sockaddr_in *)i->ifa_addr)->sin_addr; // IPv4 주소 추출
                 char ip[INET_ADDRSTRLEN]; // IPv4 주소 문자열 버퍼
                 inet_ntop(AF_INET, src, ip, INET_ADDRSTRLEN); // 주소를 사람이 읽을 수 있는 문자열로 변환
-                ip_address = ip;
+                std::string ip_address = ip;
                 break; // 첫 번째 IP 주소를 가져오고 종료
             }
         }

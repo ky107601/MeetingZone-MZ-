@@ -36,7 +36,7 @@ private:
     NetworkManager& operator=(const NetworkManager&) = delete;
 
     // Inner Field
-    std::string ip_address = "";   // Server IP 주소 문자열
+    std::string linux_ip = "";   // Server IP 주소 문자열
 
     int width = 640;
     int height = 480;
@@ -67,7 +67,10 @@ public:
         return instance;
     }
 
-    void set_ip_addr(std::string new_addr);
+    void set_linux_ip_addr(std::string new_addr);
+    std::string get_linux_ip_addr(){
+        return linux_ip;
+    }
 
     // Funciton to get IP Address
     std::string get_ip_addr();

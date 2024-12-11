@@ -145,7 +145,7 @@ void Widget::keyPressEvent(QKeyEvent *event)
     }
     else //enter : 16777220
     {
-        qDebug()<<"key = " <<event->key();
+        qDebug() << "key = " << event->key();
         if(event->key() == 16777220 || event->key() == 16777221)
         {
             // 여기서 채팅 보내야 함
