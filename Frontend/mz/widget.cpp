@@ -44,7 +44,7 @@ void Widget::connectServer()
 
     tcpSocket->connectToHost(serverAddress, serverPort.toUShort());
 
-    connect(tcpSocket, &QTcpSocket::connected, this, [this]() {
+    connect(tcpSocket, &QTcpSocket::connected, this, [this, serverIP]() {
         qDebug() << "서버 연결됨";
         qDebug() << "ui->inputServerAd = " <<ui->inputServerAd->text().toStdString();
         networkManager.set_ip_addr(ui->inputServerAd->text().toStdString());
@@ -53,8 +53,8 @@ void Widget::connectServer()
         ui->inputServerAd->clear();
         ui->inputNickname->clear();
 
-        QtConcurrent::run([this](){
-            recThread = std::thread(&Widget::getVideo, this);
+        QtConcurrent::run([this, serverIP](){
+            recThread = std::thread(&Widget::getVideo, this, serverIP);
         }); //카메라 on/off와 상관없이 항상 받아옴
     });
 
@@ -351,40 +351,72 @@ Mat& Widget::captureNewFrame() {
     return frame;
 }
 
-// 통합 비디오 수신 및 재생
-void Widget::getVideo() {
+// // 통합 비디오 수신 및 재생
+// void Widget::getVideo() {
+//     qDebug() << tcpSocket->state();
+//     while (tcpSocket->state() == QAbstractSocket::ConnectedState) {
+//         // 프레임 크기 읽기
+//         qDebug() << "영상 수신 시도";
+//         int64_t frameSize = 0;
+//         if (tcpSocket->bytesAvailable() < sizeof(frameSize)) {
+
+//             if (!tcpSocket->waitForReadyRead()) { // Wait for the frame size
+//                 cerr << "[ERROR] Waiting for frame size failed" << endl;
+//                 //return;
+//             }
+//         }
+//          tcpSocket->read(reinterpret_cast<char*>(&frameSize), sizeof(frameSize));
+
+//         if (frameSize <= 0 || frameSize > 10 * 1024 * 1024) { // Sanity check
+//             cerr << "[ERROR] Invalid frame size received: " << frameSize << endl;
+//             return;
+//         }
+
+//         // 프레임 읽기
+//         QByteArray frameData;
+//         while (frameData.size() < frameSize) {
+//             if (!tcpSocket->waitForReadyRead()) { // Wait for more data
+//                 cerr << "[ERROR] Frame data reception timed out" << endl;
+//                 return;
+//             }
+//             frameData.append(tcpSocket->read(frameSize - frameData.size()));
+//         }
+
+//         // 프레임 디코드
+//         vector<uchar> buffer(frameData.begin(), frameData.end());
+//         recFrame = imdecode(buffer, IMREAD_COLOR);
+
+//         // OpenCV 처리해야하는 부분
+
+//         if (recFrame.empty()) {
+//             cerr << "[ERROR] Failed to decode the frame" << endl;
+//             continue;
+//         }
+
+//         // Mat -> QImage
+//         QImage img((const uchar*)recFrame.data, recFrame.cols, recFrame.rows, recFrame.step, QImage::Format_RGB888);
+//         img = img.rgbSwapped(); // Convert BGR to RGB
+
+//         //videoWindow->setFixedSize(img.width(), img.height());
+//         videoWindow->setPixmap(QPixmap::fromImage(img).scaled(videoWindow->size(), Qt::KeepAspectRatio));
+
+//         // 선택: Introduce a small delay for smoother playback
+//         QCoreApplication::processEvents();
+//     }
+// }
+
+void Widget::getVideo(QString serverIP)
+{
+    NetworkManager& networkManager = NetworkManager::getInstance();
+    networkManager.openStream(serverIP.toStdString());
+
     qDebug() << tcpSocket->state();
+
     while (tcpSocket->state() == QAbstractSocket::ConnectedState) {
         // 프레임 크기 읽기
         qDebug() << "영상 수신 시도";
-        int64_t frameSize = 0;
-        if (tcpSocket->bytesAvailable() < sizeof(frameSize)) {
 
-            if (!tcpSocket->waitForReadyRead()) { // Wait for the frame size
-                cerr << "[ERROR] Waiting for frame size failed" << endl;
-                //return;
-            }
-        }
-         tcpSocket->read(reinterpret_cast<char*>(&frameSize), sizeof(frameSize));
-
-        if (frameSize <= 0 || frameSize > 10 * 1024 * 1024) { // Sanity check
-            cerr << "[ERROR] Invalid frame size received: " << frameSize << endl;
-            return;
-        }
-
-        // 프레임 읽기
-        QByteArray frameData;
-        while (frameData.size() < frameSize) {
-            if (!tcpSocket->waitForReadyRead()) { // Wait for more data
-                cerr << "[ERROR] Frame data reception timed out" << endl;
-                return;
-            }
-            frameData.append(tcpSocket->read(frameSize - frameData.size()));
-        }
-
-        // 프레임 디코드
-        vector<uchar> buffer(frameData.begin(), frameData.end());
-        recFrame = imdecode(buffer, IMREAD_COLOR);
+        recFrame = networkManager.getFrame(recFrame);
 
         // OpenCV 처리해야하는 부분
 
