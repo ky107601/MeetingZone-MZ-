@@ -56,7 +56,7 @@ void Widget::connectServer()
 {
     // 연결 확인
     QString serverIP = ui->inputServerAd->text();
-    QString serverPort = "8888";
+    QString serverPort = "8080";
     QHostAddress serverAddress(serverIP);
 
     tcpSocket->connectToHost(serverAddress, serverPort.toUShort());
@@ -79,11 +79,15 @@ void Widget::connectServer()
         ui->inputServerAd->clear();
         ui->inputNickname->clear();
 
-        QtConcurrent::run([this](){getVideo();}); //카메라 on/off와 상관없이 항상 받아옴
+        QtConcurrent::run([this](){
+            recThread = std::thread(&Widget::getVideo, this);
+        }); //카메라 on/off와 상관없이 항상 받아옴
     });
 
     connect(tcpSocket, &QTcpSocket::errorOccurred, this, [this]() {
         QMessageBox::warning(this, "실패", "서버 연결에 실패하였습니다.", QMessageBox::Ok);
+        tcpSocket->disconnectFromHost();
+        ui->stackedWidget->setCurrentIndex(0);
     });
 }
 
@@ -690,7 +694,7 @@ void Widget::setUI() {
     //통합된 비디오 출력 창
     videoWindow = new QLabel("", ui->backWidget);
     videoWindow->setGeometry(QRect(QPoint(ui->background->pos().x() + 10, ui->background->pos().y() + 10), QSize(780, 440))); // Offset 조금 + 크기 설정
-    videoWindow->setStyleSheet("background-color: rgb(0, 0, 0, 0);");
+    videoWindow->setStyleSheet("background-color: rgba(0, 0, 0, 0);");
 
     cam = new camViewer(ui->backWidget);
     cam->raise();
@@ -699,7 +703,7 @@ void Widget::setUI() {
     ui->chatInput->setPlaceholderText("Enter your text here ...");
     chatBox = new QLabel("", ui->backWidget);
     chatBox->setGeometry(QRect(50,400,50,50));
-    chatBox->setStyleSheet("background-color : rgb(0, 0, 0, 0);");
+    chatBox->setStyleSheet("background-color : rgba(0, 0, 0, 0);");
     chatBox->raise();
 
     micOffIcon = QIcon(":/resources/mic_off.png");
@@ -774,8 +778,7 @@ void Widget::setToggleVideo() {
             // }
 
             //sendVideo();
-            startStreaming();
-
+            sendThread = std::thread(&Widget::startStreaming, this);
         }
         else            //status : video on -> off
         {
@@ -788,7 +791,7 @@ void Widget::setToggleVideo() {
         videoFlag = !videoFlag;
         ui->videoBtn->setIconSize(QSize(40, 40));
     });
-    cam->setStyleSheet("background-color : rgb(0,0,0,0);");
+    cam->setStyleSheet("background-color : rgb(0,0,0);");
     return;
 }
 
@@ -822,12 +825,13 @@ void Widget::getVideo() {
         qDebug() << "영상 수신 시도";
         int64_t frameSize = 0;
         if (tcpSocket->bytesAvailable() < sizeof(frameSize)) {
+
             if (!tcpSocket->waitForReadyRead()) { // Wait for the frame size
                 cerr << "[ERROR] Waiting for frame size failed" << endl;
                 //return;
             }
         }
-        tcpSocket->read(reinterpret_cast<char*>(&frameSize), sizeof(frameSize));
+         tcpSocket->read(reinterpret_cast<char*>(&frameSize), sizeof(frameSize));
 
         if (frameSize <= 0 || frameSize > 10 * 1024 * 1024) { // Sanity check
             cerr << "[ERROR] Invalid frame size received: " << frameSize << endl;

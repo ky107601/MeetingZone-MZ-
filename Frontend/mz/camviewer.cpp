@@ -17,7 +17,8 @@ void camViewer::mouseMoveEvent(QMouseEvent *event)
             position = newPos;
             qDebug() << "(" << position.x() <<", "<<position.y() <<") 로 이동";
             this->move(newPos);
-            //서버에 newPos 전송
+
+            XYToJson(newPos);
         }
     }
 }
@@ -72,4 +73,31 @@ void camViewer::moveByKey(int key)
          }
         break;
     }
+}
+
+QByteArray camViewer::XYToJson(QPoint xy)
+{
+    // JSON으로 변환
+    QJsonObject json;
+    json["x"] = xy.x();
+    json["y"] = xy.y();
+    QJsonDocument doc(json);
+    QByteArray serializedData = doc.toJson(QJsonDocument::Compact);
+
+    qDebug()<<"json 으로 serialize 완료";
+
+    return serializedData;
+
+
+    // // 전송
+    // if (tcpSocket->state() == QAbstractSocket::ConnectedState) {
+    //     qint64 bytesWritten = tcpSocket->write(serializedData);
+    //     if (bytesWritten == -1) {
+    //         qDebug() << "Failed to send data:" << tcpSocket->errorString();
+    //     } else {
+    //         qDebug() << "Sent data:" << serializedData;
+    //     }
+    // } else {
+    //     qDebug() << "Socket not connected!";
+    // }
 }

@@ -293,16 +293,16 @@ void NetworkManager::updateImage(cv::Mat& image, int imageCounter) {
     cv::resize(smallMask, binaryMask, image.size(), 0, 0, cv::INTER_NEAREST);
 
     // RGBA 이미지 생성
-    cv::Mat transparentImg(image.size(), CV_8UC4, cv::Scalar(0, 0, 0, 0));
-    std::vector<cv::Mat> bgrChannels;
-    split(image, bgrChannels);
+    // cv::Mat transparentImg(image.size(), CV_8UC4, cv::Scalar(0, 0, 0, 0));
+    // std::vector<cv::Mat> bgrChannels;
+    // split(image, bgrChannels);
 
-    cv::Mat alphaChannel;
-    binaryMask.convertTo(alphaChannel, CV_8UC1, 255.0);
-    bgrChannels.push_back(alphaChannel);
-    merge(bgrChannels, transparentImg);
+    // cv::Mat alphaChannel;
+    // binaryMask.convertTo(alphaChannel, CV_8UC1, 255.0);
+    // bgrChannels.push_back(alphaChannel);
+    // merge(bgrChannels, transparentImg);
 
-    image = transparentImg;
+    // image = transparentImg;
 }
 
 
@@ -341,9 +341,9 @@ void NetworkManager::sendImages() {
         int linesize[1] = {static_cast<int>(image.step[0])};
         sws_scale(sws_ctx, data, linesize, 0, codec_ctx->height, frame->data, frame->linesize);
 
-        // 타임스탬프 계산
-        frame->pts = pts;
-        pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
+         // 타임스탬프 계산
+         frame->pts = pts;
+         pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
 
 <<<<<<< HEAD
 <<<<<<< HEAD

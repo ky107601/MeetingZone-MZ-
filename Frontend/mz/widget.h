@@ -74,6 +74,14 @@ public:
 >>>>>>> 05136ac (clframe write & read)
 
     Mat recFrame;
+=======
+>>>>>>> 05136ac (clframe write & read)
+
+    QTcpSocket *tcpSocket; //클라이언트 소켓
+    Mat recFrame;
+
+    std::thread sendThread;
+    std::thread recThread;
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -91,7 +99,7 @@ private:
     const std::string rtsp_url;
 
     QLabel *videoWindow; //비디오 출력 창
-    QTcpSocket *tcpSocket; //클라이언트 소켓
+
 
     // Widget()
     void startStreaming();
