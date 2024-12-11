@@ -43,7 +43,7 @@
  
 | On | Off |
 |-----|-----|
-| <img src="Frontend/mz/resources/video_on.png" style="width:65px;"/> | <img src="Frontend/mz/resources/video_off.png" style="width:65px;"/> |
+| <img src="Frontend/mz/resources/video_on.png" style="width:50px;"/> | <img src="Frontend/mz/resources/video_off.png" style="width:50px;"/> |
 
 1. 화면의 하단에 있는 비디오 이미지를 클릭하여 카메라를 사용 및 중단 합니다.
 2. 왼쪽 가장 위에 출력되는 영상의 위치를 **키보드의 방향키**나 **마우스로 드래그**하여 화면 내에서 **이동**할 수 있습니다.
@@ -56,13 +56,13 @@
 
 | 교체 버튼 | 추가 버튼 |
 |-----|-----|
-| <img src="Frontend/mz/resources/change.png" style="width:65px;"/> | <img src="Frontend/mz/resources/plus.png" style="width:65px;"/> |
+| <img src="Frontend/mz/resources/change.png" style="width:50px;"/> | <img src="Frontend/mz/resources/plus.png" style="width:50px;"/> |
 
 1. **교체 버튼**을 클릭하여 기본 배경 중에서 원하는 배경을 선택할 수 있습니다.
 2. **추가 버튼**을 클릭하여 원하는 이미지 파일을 로컬에서 선택할 수 있습니다.
 
 #### 접속 종료
 
-<img src="Frontend/mz/resources/exit.png" style="width:65px;"/>
+<img src="Frontend/mz/resources/exit.png" style="width:50px;"/>
 
  빨간색 통화 종료 버튼을 클릭하여 회의를 종료합니다.
