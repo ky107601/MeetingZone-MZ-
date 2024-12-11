@@ -90,7 +90,8 @@ void NetworkManager::freeAllAV() {
     return;
 }
 
-void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, AVPacket *pkt) {
+
+void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts) {
 
     // Convert to YUV format
     const uint8_t* data[1] = {image.data};
@@ -101,7 +102,7 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, A
     frame->pts = pts;
     pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
 
-    pkt = av_packet_alloc();
+    AVPacket* pkt = av_packet_alloc();
     int ret = avcodec_send_frame(codec_ctx, frame);
 
     while (ret >= 0) {
