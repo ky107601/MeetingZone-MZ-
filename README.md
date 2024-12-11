@@ -54,7 +54,7 @@
 - 회의 배경 변경
 	| 교체 버튼 | 추가 버튼 |
 	|-----|-----|
-	| <img src="Frontend/mz/resources/change.png"/> | <img src="Frontend/mz/resources/plus.png"/> |
+	| <img src="Frontend/mz/resources/change.png" style="width:80px;"/> | <img src="Frontend/mz/resources/plus.png" style="width:80px;"/> |
 1. **교체 버튼**을 클릭하여 기본 배경 중에서 원하는 배경을 선택할 수 있습니다.
 2. **추가 버튼**을 클릭하여 원하는 이미지 파일을 로컬에서 선택할 수 있습니다.
 
