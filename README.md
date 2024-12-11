@@ -62,6 +62,6 @@
 
 #### 접속 종료
 
-<img src="Frontend/mz/resources/exit.png"/>
+<img src="Frontend/mz/resources/exit.png" style="width:80px;"/>
 
  빨간색 통화 종료 버튼을 클릭하여 회의를 종료합니다.
