@@ -27,6 +27,9 @@
 #include <QAbstractSocket>
 #include <QtConcurrent>
 #include <thread>
+#include <QThread>
+#include <QTextEdit>
+#include <QDataStream>
 
 #include "networkmanager.h"
 
@@ -62,13 +65,15 @@ public:
     string width, height;
 
     backgroundPicture picture;
-    QLabel *chatBox;
+    QTextEdit *chatBox;
 
     QTcpSocket *tcpSocket; //클라이언트 소켓
     Mat recFrame;
 
     std::thread sendThread;
     std::thread recThread;
+
+    void sendXY();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -101,5 +106,7 @@ private:
     Mat& captureNewFrame();
     void getVideo(QString serverIP);
     void sendVideo();
+
+
 };
 #endif // WIDGET_H

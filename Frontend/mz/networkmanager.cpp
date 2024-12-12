@@ -11,6 +11,7 @@ std::string NetworkManager::get_ip_addr() {
     struct ifaddrs *ifap = nullptr; // 네트워크 인터페이스 구조체 포인터
     struct ifaddrs *i = nullptr;   // 순회용 포인터
     void *src;                     // IP 주소 데이터의 시작 지점
+    std::string ip_address;
 
     if (getifaddrs(&ifap) == 0) {  // 네트워크 인터페이스 목록 생성
         for (i = ifap; i != nullptr; i = i->ifa_next) { // 인터페이스 순회
@@ -22,7 +23,7 @@ std::string NetworkManager::get_ip_addr() {
                 src = &((struct sockaddr_in *)i->ifa_addr)->sin_addr; // IPv4 주소 추출
                 char ip[INET_ADDRSTRLEN]; // IPv4 주소 문자열 버퍼
                 inet_ntop(AF_INET, src, ip, INET_ADDRSTRLEN); // 주소를 사람이 읽을 수 있는 문자열로 변환
-                std::string ip_address = ip;
+                ip_address = ip;
                 break; // 첫 번째 IP 주소를 가져오고 종료
             }
         }

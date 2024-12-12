@@ -21,11 +21,12 @@ public:
     QPoint offset;
 
     void moveByKey(int key);
-    QByteArray XYToJson(QPoint xy);
+    QByteArray XYToJson();
 protected:
     void mouseMoveEvent(QMouseEvent *ev) override;
     void mousePressEvent(QMouseEvent *ev) override;
-
+Q_SIGNALS:
+    void sendDataToWidget(const QByteArray& data);
 };
 
 #endif // CAMVIEWER_H

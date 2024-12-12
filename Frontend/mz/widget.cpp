@@ -16,6 +16,9 @@ Widget::Widget(QWidget *parent)
 
     // startStreaming();
     setUI();
+    //========== 임시 ===========
+    ui->inputServerAd->setText("192.168.0.184");
+    //==========================
 
     // string pipeline = setPipeline();
     // openCamera(pipeline);
@@ -47,7 +50,7 @@ void Widget::connectServer()
     connect(tcpSocket, &QTcpSocket::connected, this, [this, serverIP]() {
         qDebug() << "서버 연결됨";
         qDebug() << "ui->inputServerAd = " <<ui->inputServerAd->text().toStdString();
-        networkManager.set_ip_addr(ui->inputServerAd->text().toStdString());
+        networkManager.set_linux_ip_addr(ui->inputServerAd->text().toStdString());
         qDebug() <<"get ip = " << networkManager.get_ip_addr();
         ui->stackedWidget->setCurrentIndex(1);
         ui->inputServerAd->clear();
@@ -138,9 +141,11 @@ void Widget::mousePressEvent(QMouseEvent *event)
 
 void Widget::keyPressEvent(QKeyEvent *event)
 {
+    qDebug() <<"KeyPressEvent 들어옴";
     //left : 16777234, down : 16777235, right : 16777236, up : 16777237
     if(!ui->chatInput->hasFocus()) //ui->chatInpt doesn't have focus(not entering something)
     {
+        qDebug() << "key = " << event->key();
         cam->moveByKey(event->key());
     }
     else //enter : 16777220
@@ -160,7 +165,7 @@ void Widget::keyPressEvent(QKeyEvent *event)
 
             qDebug() << "Message sent to server. Size:" << messageSize << ", Content:" << message;
 
-            chatBox->setText(message);
+            chatBox->append(message);
             ui->chatInput->clear();
         }
     }
@@ -235,9 +240,11 @@ void Widget::setUI() {
     cam->hide();
 
     ui->chatInput->setPlaceholderText("Enter your text here ...");
-    chatBox = new QLabel("", ui->backWidget);
-    chatBox->setGeometry(QRect(50,400,50,50));
-    chatBox->setStyleSheet("background-color : rgba(0, 0, 0, 0);");
+    chatBox = new QTextEdit("", ui->backWidget);
+    chatBox->setGeometry(QRect(10,400,300,50));
+    chatBox->setStyleSheet("background-color : rgba(128, 128, 128, 0.5);");
+    chatBox->setReadOnly(true); // Make it read-only
+    chatBox->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     chatBox->raise();
 
     micOffIcon = QIcon(":/resources/mic_off.png");
@@ -313,6 +320,14 @@ void Widget::setToggleVideo() {
 
             //sendVideo();
             sendThread = std::thread(&Widget::startStreaming, this);
+
+            // 1초에 한번씩 좌표 전송
+            QTimer *timer = new QTimer(this);
+            connect(timer, &QTimer::timeout, this, &Widget::sendXY);
+            timer->start(1000);
+
+            // 이벤트 발생 시 좌표 전송
+           // connect(cam ,&camViewer::sendDataToWidget, this, &Widget::sendXY);
         }
         else            //status : video on -> off
         {
@@ -325,7 +340,7 @@ void Widget::setToggleVideo() {
         videoFlag = !videoFlag;
         ui->videoBtn->setIconSize(QSize(40, 40));
     });
-    cam->setStyleSheet("background-color : rgb(0,0,0);");
+    cam->setStyleSheet("background-color : rgb(0, 0, 0);");
     return;
 }
 
@@ -430,7 +445,8 @@ void Widget::getVideo(QString serverIP)
         img = img.rgbSwapped(); // Convert BGR to RGB
 
         //videoWindow->setFixedSize(img.width(), img.height());
-        videoWindow->setPixmap(QPixmap::fromImage(img).scaled(videoWindow->size(), Qt::KeepAspectRatio));
+       // videoWindow->setPixmap(QPixmap::fromImage(img).scaled(videoWindow->size(), Qt::KeepAspectRatio));
+        videoWindow->setPixmap(QPixmap::fromImage(img).scaled(videoWindow->size(), Qt::IgnoreAspectRatio));
 
         // 선택: Introduce a small delay for smoother playback
         QCoreApplication::processEvents();
@@ -510,4 +526,29 @@ void Widget::sendVideo()
     }
 
     capture.release();
+}
+
+void Widget::sendXY()
+{
+    if (tcpSocket->state() == QAbstractSocket::ConnectedState) {
+        QByteArray data = cam->XYToJson();
+        QByteArray packet;
+        QDataStream stream(&packet, QIODevice::WriteOnly);
+        stream.setVersion(QDataStream::Qt_6_7); // Match sender/receiver Qt versions
+        stream << static_cast<quint32>(data.size()); // Send the size as 32-bit unsigned int
+        packet.append(data); // Append the JSON data
+
+        // Send the packet
+        qint64 bytesWritten = tcpSocket->write(packet);
+
+        if (bytesWritten == -1) {
+            qDebug() << "Failed to send JSON data:" << tcpSocket->errorString();
+        } else {
+            qDebug() << "Sent JSON data with size:" << data.size();
+            qDebug() << "data : " << data;
+            tcpSocket->flush(); // Optional: Immediately send the data
+        }
+    } else {
+        qDebug() << "Socket not connected!";
+    }
 }
