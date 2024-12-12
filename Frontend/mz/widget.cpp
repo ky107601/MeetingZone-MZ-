@@ -9,12 +9,207 @@
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::Widget)
+    , ui(new Ui::Widget), tcpSocket(new QTcpSocket(this))
 {
     ui->setupUi(this);
     //this->showMaximized(); //full-size
 
+    // startStreaming();
+    setUI();
 
+    // string pipeline = setPipeline();
+    // openCamera(pipeline);
+
+    //setTimerForFrame();
+    setToggleVideo();
+    setBackground();
+
+    NetworkManager::getInstance().startMediaMTX();
+}
+
+Widget::~Widget()
+{
+    // Stop MediaMTX server before exiting
+    NetworkManager::getInstance().stopMediaMTX();
+    delete ui;
+}
+
+/* slots */
+void Widget::connectServer()
+{
+    // 연결 확인
+    QString serverIP = ui->inputServerAd->text();
+    QString serverPort = "8080";
+    QHostAddress serverAddress(serverIP);
+
+    tcpSocket->connectToHost(serverAddress, serverPort.toUShort());
+
+    connect(tcpSocket, &QTcpSocket::connected, this, [this]() {
+        qDebug() << "서버 연결됨";
+        qDebug() << "ui->inputServerAd = " <<ui->inputServerAd->text().toStdString();
+        networkManager.set_ip_addr(ui->inputServerAd->text().toStdString());
+        qDebug() <<"get ip = " << networkManager.get_ip_addr();
+        ui->stackedWidget->setCurrentIndex(1);
+        ui->inputServerAd->clear();
+        ui->inputNickname->clear();
+
+        QtConcurrent::run([this](){
+            recThread = std::thread(&Widget::getVideo, this);
+        }); //카메라 on/off와 상관없이 항상 받아옴
+    });
+
+    connect(tcpSocket, &QTcpSocket::errorOccurred, this, [this]() {
+        QMessageBox::warning(this, "실패", "서버 연결에 실패하였습니다.", QMessageBox::Ok);
+        tcpSocket->disconnectFromHost();
+        ui->stackedWidget->setCurrentIndex(0);
+    });
+}
+
+void Widget::changeIcon()
+{
+    if(!micFlag) //status : mic off -> on
+        ui->micBtn->setIcon(micOnIcon);
+    else        //status : mic on -> off
+        ui->micBtn->setIcon(micOffIcon);
+    micFlag = !micFlag;
+    ui->micBtn->setIconSize(QSize(40, 40));
+}
+
+void Widget::updateFrame()
+{
+    // // GrabCut 상태 유지
+    // static Mat prevMask, bgModel, fgModel;
+    // static bool isInitialized = false;
+    // static int frameCounter = 0;
+    // static Mat lastBinaryMask, prevFrame;
+
+    // Mat frame = captureNewFrame();
+    // // 관심 영역 (ROI) 동적 설정
+    // Rect roi(10, 10, frame.cols-20, frame.rows-20);
+    // frameROI = frame(roi);
+    // frame.copyTo(prevFrame);
+    // // GrabCut 초기화
+    // if (!isInitialized) {
+    //     prevMask = Mat(frameROI.size(), CV_8UC1, Scalar(GC_BGD));
+    //     Rect initRect(10, 10, frameROI.cols - 20, frameROI.rows - 20);
+    //     prevMask(initRect).setTo(Scalar(GC_PR_FGD));
+    //     grabCut(frameROI, prevMask, initRect, bgModel, fgModel, 5, GC_INIT_WITH_RECT);
+    //     lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
+    //     isInitialized = true;
+    // }
+
+    // // 프레임 샘플링 (10프레임마다 GrabCut 실행)
+    // if (frameCounter % 10 == 0) {
+    //     grabCut(frameROI, prevMask, Rect(), bgModel, fgModel, 1, GC_INIT_WITH_MASK);
+    //     lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
+    // }
+
+    // // ROI 기반 이진 마스크 축소/확대
+    // Mat smallMask, binaryMask;
+    // cv::resize(lastBinaryMask, smallMask, Size(), 0.5, 0.5, INTER_NEAREST);
+    // cv::resize(smallMask, binaryMask, frame.size(), 0, 0, INTER_NEAREST);
+
+    // // RGBA 이미지 생성
+    // Mat transparentImg(frame.size(), CV_8UC4, Scalar(0, 0, 0, 0));
+    // vector<Mat> bgrChannels;
+    // split(frame, bgrChannels);
+
+    // Mat alphaChannel;
+    // binaryMask.convertTo(alphaChannel, CV_8UC1, 255.0);
+    // bgrChannels.push_back(alphaChannel);
+    // merge(bgrChannels, transparentImg);
+
+    // // Convert to QImage with transparency
+    // QImage qimg(transparentImg.data, transparentImg.cols, transparentImg.rows, transparentImg.step, QImage::Format_RGBA8888);
+
+    // //라벨에 표시
+    // cam->setFixedSize(transparentImg.cols / 5, transparentImg.rows / 5);
+    // cam->setPixmap(QPixmap::fromImage(qimg).scaled(cam->size(), Qt::KeepAspectRatio));
+
+    // // 프레임 카운터 증가
+    // frameCounter++;
+}
+
+void Widget::mousePressEvent(QMouseEvent *event)
+{
+    ui->chatInput->clearFocus();
+    qDebug("clear Focus");
+}
+
+void Widget::keyPressEvent(QKeyEvent *event)
+{
+    //left : 16777234, down : 16777235, right : 16777236, up : 16777237
+    if(!ui->chatInput->hasFocus()) //ui->chatInpt doesn't have focus(not entering something)
+    {
+        cam->moveByKey(event->key());
+    }
+    else //enter : 16777220
+    {
+        qDebug() << "key = " << event->key();
+        if(event->key() == 16777220 || event->key() == 16777221)
+        {
+            // 여기서 채팅 보내야 함
+            QString message = ui->chatInput->text();
+            QByteArray messageData = message.toUtf8();
+            int32_t messageSize = messageData.size();
+
+            // 메시지 크기 먼저 전송 후 메시지 전송
+            // tcpSocket->write(reinterpret_cast<const char*>(&messageSize), sizeof(messageSize));
+            // tcpSocket->write(messageData);
+            // tcpSocket->flush();
+
+            qDebug() << "Message sent to server. Size:" << messageSize << ", Content:" << message;
+
+            chatBox->setText(message);
+            ui->chatInput->clear();
+        }
+    }
+}
+
+void Widget::selectPicture()
+{
+    QString filePath = QFileDialog::getOpenFileName(nullptr, "Open Image File", "", "Images (*.png *.jpg *.jpeg *.bmp *.gif)");
+
+    if (filePath.isEmpty()) {
+        qDebug() << "No file selected.";
+        return;
+    }
+
+    ui->background->setPixmap(QPixmap(filePath));
+    picture.addPicture(filePath.toStdString());
+}
+
+
+/* 리팩토링용 함수들 */
+
+void Widget::startStreaming() {
+    /* ========== NetworkManager ========== */
+
+    //rtsp_url set_ip_addr로 설정
+
+    qDebug() <<"ui->inpustServerAd->text().toStdString()" << ui->inputServerAd->text().toStdString();
+    const std::string rtsp_url = "rtsp://" + networkManager.get_ip_addr() + ":8554/camera";
+    qDebug() <<"rtsp_url = " <<rtsp_url;
+
+    // Register signal handler to clean up resources
+    std::signal(SIGINT, [](int) {
+        NetworkManager::getInstance().stopMediaMTX();
+        exit(EXIT_SUCCESS);
+    });
+
+    // Start MediaMTX server
+    // networkManager.startMediaMTX();
+
+    // Start RTSP streaming in a separate thread
+    std::thread streaming_thread(&NetworkManager::startRTSP, &networkManager, rtsp_url);
+
+    // Wait for the streaming thread to complete
+    streaming_thread.join();
+    /* ==================================== */
+    return;
+}
+
+void Widget::setUI() {
     /* Set the inputBox style */
     QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect();
     shadowEffect->setBlurRadius(5);         // Set blur radius for the shadow
@@ -25,17 +220,25 @@ Widget::Widget(QWidget *parent)
     QWidget *page2 = new QWidget;
     ui->stackedWidget->addWidget(page2);
 
-    connect(ui->enterBtn, &QPushButton::clicked, this, [&](){
-        //Check the server address and the nickname is written
-        ui->stackedWidget->setCurrentIndex(1);
-    });
+    connect(ui->enterBtn, SIGNAL(clicked()), this, SLOT(connectServer()));
 
     ui->changeBackBtn->setIcon(QIcon(":/resources/change.png"));
     ui->addBackBtn->setIcon(QIcon(":/resources/plus.png"));
+
+    //통합된 비디오 출력 창
+    videoWindow = new QLabel("", ui->backWidget);
+    videoWindow->setGeometry(QRect(QPoint(ui->background->pos().x() + 10, ui->background->pos().y() + 10), QSize(780, 440))); // Offset 조금 + 크기 설정
+    videoWindow->setStyleSheet("background-color: rgba(0, 0, 0, 0);");
+
     cam = new camViewer(ui->backWidget);
+    cam->raise();
     cam->hide();
 
     ui->chatInput->setPlaceholderText("Enter your text here ...");
+    chatBox = new QLabel("", ui->backWidget);
+    chatBox->setGeometry(QRect(50,400,50,50));
+    chatBox->setStyleSheet("background-color : rgba(0, 0, 0, 0);");
+    chatBox->raise();
 
     micOffIcon = QIcon(":/resources/mic_off.png");
     micOnIcon = QIcon(":/resources/mic_on.png");
@@ -56,145 +259,223 @@ Widget::Widget(QWidget *parent)
         response = QMessageBox::question(this, "Disconnect", "Are you sure you want to end the call?!?!", QMessageBox::Yes | QMessageBox::No);
 
         if(response == QMessageBox::Yes) //End the call
+        {
+            tcpSocket->disconnectFromHost();
             ui->stackedWidget->setCurrentIndex(0);
+        }
     });
 
     connect(ui->micBtn, SIGNAL(clicked()), this, SLOT(changeIcon()));
+    return;
+}
 
+string& Widget::setPipeline() {
     width="640";
     height="480";
     string pipeline =
         "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 "
         "! video/x-raw,width="+width+",height="+height+",framerate=10/1,format=RGBx "
-        "! videoconvert ! videoscale ! appsink";
+                                        "! videoconvert ! videoscale ! appsink";
+    return pipeline;
+}
 
-    if(!cap.open(pipeline, CAP_GSTREAMER))
-    {
-        qDebug()<<"Failed to open the camera!";
+void Widget::openCamera(string& pipeline) {
+    if(!cap.open(pipeline, CAP_GSTREAMER)) {
+        qDebug() << "Failed to open the camera!";
     }
+}
 
-    //Set the timer to capture the frame
+//Set the timer to capture the frame
+void Widget::setTimerForFrame() {
     captureTimer = new QTimer(this);
     connect(captureTimer, &QTimer::timeout, this, &Widget::updateFrame);
+    return;
+}
 
-    //ON/OFF the video
+//ON/OFF the video
+void Widget::setToggleVideo() {
     connect(ui->videoBtn, &QPushButton::clicked, this, [=](){
         if(!videoFlag)  //status : video off -> on
         {
             ui->videoBtn->setIcon(videoOnIcon);
+            cam->setStyleSheet("background-color : white;");
             cam->show();
-            captureTimer->start(100);
+            //captureTimer->start(100);
+            // width="640";
+            // height="480";
+            // string pipeline =
+            //     "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 "
+            //     "! video/x-raw,width="+width+",height="+height+",framerate=10/1,format=RGBx "
+            //                                     "! videoconvert ! videoscale ! appsink";
+            // if(!cap.open(pipeline, CAP_GSTREAMER)) {
+            //     qDebug()<<"Failed to open the camera!";
+            // }
+
+            //sendVideo();
+            sendThread = std::thread(&Widget::startStreaming, this);
         }
         else            //status : video on -> off
         {
             ui->videoBtn->setIcon(videoOffIcon);
-            captureTimer->stop();
+            //captureTimer->stop();
             cam->hide();
+            //카메라 화면 투명화해서 전송
+
         }
         videoFlag = !videoFlag;
         ui->videoBtn->setIconSize(QSize(40, 40));
     });
-    cam->setStyleSheet("background-color : rgba(0, 0, 0, 0);");
+    cam->setStyleSheet("background-color : rgb(0,0,0);");
+    return;
+}
 
+void Widget::setBackground() {
     // change background picture
     connect(ui->changeBackBtn, &QPushButton::clicked, this, [this](){
         QString nextPath = QString::fromStdString(picture.getNextPicture());
         qDebug() << "nextPath = " << nextPath;
         ui->background->setPixmap(QPixmap(nextPath));
     });
-
     connect(ui->addBackBtn, SIGNAL(clicked()), this, SLOT(selectPicture()));
+    return;
 }
 
-Widget::~Widget()
-{
-    delete ui;
+// 새로운 프레임 캡처
+Mat& Widget::captureNewFrame() {
+    Mat frame;
+    // cap.read(frame);
+    // if (frame.empty()) {
+    //     qDebug() << "Unable to grab frame!";
+    // }
+    // networkManager::
+    return frame;
 }
 
-void Widget::changeIcon()
-{
-    if(!micFlag) //status : mic off -> on
-        ui->micBtn->setIcon(micOnIcon);
-    else        //status : mic on -> off
-        ui->micBtn->setIcon(micOffIcon);
-    micFlag = !micFlag;
-    ui->micBtn->setIconSize(QSize(40, 40));
-}
+// 통합 비디오 수신 및 재생
+void Widget::getVideo() {
+    qDebug() << tcpSocket->state();
+    while (tcpSocket->state() == QAbstractSocket::ConnectedState) {
+        // 프레임 크기 읽기
+        qDebug() << "영상 수신 시도";
+        int64_t frameSize = 0;
+        if (tcpSocket->bytesAvailable() < sizeof(frameSize)) {
 
-void Widget::updateFrame()
-{
-    static Ptr<BackgroundSubtractor> bgSubtractor = createBackgroundSubtractorMOG2();
-
-    Mat frame, fgMask, rgbaFrame;
-    cap.read(frame); // Capture a new frame
-
-    if (frame.empty()) {
-        qDebug() << "Unable to grab frame!";
-        return;
-    }
-
-    // 학습 형태
-    //bgSubtractor->apply(frame, fgMask, 0.001);
-
-    static int frameCount = 0;
-    if (frameCount < 100) { // 초기 100프레임 동안만 학습
-        bgSubtractor->apply(frame, fgMask, -1);
-        frameCount++;
-    } else {
-        bgSubtractor->apply(frame, fgMask, 0); // 이후 학습 중지
-    }
-
-    // 가우시안-부드럽게 threshold-이진화
-    GaussianBlur(fgMask, fgMask, Size(11, 11), 3.5, 3.5);
-    threshold(fgMask, fgMask, 200, 255, THRESH_BINARY);
-
-    cvtColor(frame, rgbaFrame, COLOR_BGR2RGBA);
-
-    // 마스크 병합
-    for (int y = 0; y < fgMask.rows; ++y) {
-        for (int x = 0; x < fgMask.cols; ++x) {
-            if (fgMask.at<uchar>(y, x) == 0) {
-                // Background: set alpha to 0 (transparent)
-                rgbaFrame.at<Vec4b>(y, x)[3] = 255;
-            } else {
-                // Foreground: set alpha to 255 (opaque)
-                rgbaFrame.at<Vec4b>(y, x)[3] = 255;
+            if (!tcpSocket->waitForReadyRead()) { // Wait for the frame size
+                cerr << "[ERROR] Waiting for frame size failed" << endl;
+                //return;
             }
         }
+         tcpSocket->read(reinterpret_cast<char*>(&frameSize), sizeof(frameSize));
+
+        if (frameSize <= 0 || frameSize > 10 * 1024 * 1024) { // Sanity check
+            cerr << "[ERROR] Invalid frame size received: " << frameSize << endl;
+            return;
+        }
+
+        // 프레임 읽기
+        QByteArray frameData;
+        while (frameData.size() < frameSize) {
+            if (!tcpSocket->waitForReadyRead()) { // Wait for more data
+                cerr << "[ERROR] Frame data reception timed out" << endl;
+                return;
+            }
+            frameData.append(tcpSocket->read(frameSize - frameData.size()));
+        }
+
+        // 프레임 디코드
+        vector<uchar> buffer(frameData.begin(), frameData.end());
+        recFrame = imdecode(buffer, IMREAD_COLOR);
+
+        // OpenCV 처리해야하는 부분
+
+        if (recFrame.empty()) {
+            cerr << "[ERROR] Failed to decode the frame" << endl;
+            continue;
+        }
+
+        // Mat -> QImage
+        QImage img((const uchar*)recFrame.data, recFrame.cols, recFrame.rows, recFrame.step, QImage::Format_RGB888);
+        img = img.rgbSwapped(); // Convert BGR to RGB
+
+        //videoWindow->setFixedSize(img.width(), img.height());
+        videoWindow->setPixmap(QPixmap::fromImage(img).scaled(videoWindow->size(), Qt::KeepAspectRatio));
+
+        // 선택: Introduce a small delay for smoother playback
+        QCoreApplication::processEvents();
+    }
+}
+
+void Widget::sendVideo()
+{
+    qDebug() << tcpSocket->state();
+    /*
+    while (tcpSocket->state() == QAbstractSocket::ConnectedState) {
+
+        Mat frame;
+        vector<uchar> buffer;
+        qDebug() << "영상 송신 시도";
+        while(cap.read(frame))
+        {
+            if(frame.empty())
+            {
+                qDebug() <<"Unable to grab frame!!";
+                continue;
+            }
+            // Encode frame as JPEG
+            imencode(".jpg", frame, buffer);
+
+            // Send size of the buffer first
+            qint64 bufferSize = buffer.size();
+            tcpSocket->write(reinterpret_cast<const char*>(&bufferSize), sizeof(bufferSize));
+
+            // Send the actual buffer data
+            tcpSocket->write(reinterpret_cast<const char*>(buffer.data()), bufferSize);
+
+            if (!tcpSocket->waitForBytesWritten(3000)) {
+                qDebug() << "Error sending frame!";
+            }
+
+            QThread::msleep(30); // To maintain the frame rate
+        }
+
+        // 선택: Introduce a small delay for smoother playback
+        QCoreApplication::processEvents();
+        cap.release();
     }
 
-    // Convert to QImage with transparency
-    QImage qimg(rgbaFrame.data, rgbaFrame.cols, rgbaFrame.rows, rgbaFrame.step, QImage::Format_RGBA8888);
-
-    //라벨에 표시
-    cam->setFixedSize(rgbaFrame.cols / 5, rgbaFrame.rows / 5);
-    cam->setPixmap(QPixmap::fromImage(qimg).scaled(cam->size(), Qt::KeepAspectRatio));
-}
-
-void Widget::mousePressEvent(QMouseEvent *event)
-{
-    ui->chatInput->clearFocus();
-    qDebug("clear Focus");
-}
-
-void Widget::keyPressEvent(QKeyEvent *event)
-{
-    //left : 16777234, down : 16777235, right : 16777236, up : 16777237
-    if(!ui->chatInput->hasFocus()) //ui->chatInpt doesn't have focus(not entering something)
-    {
-        cam->moveByKey(event->key());
-    }
-}
-
-void Widget::selectPicture()
-{
-    QString filePath = QFileDialog::getOpenFileName(nullptr, "Open Image File", "", "Images (*.png *.jpg *.jpeg *.bmp *.gif)");
-
-    if (filePath.isEmpty()) {
-        qDebug() << "No file selected.";
+    */
+    QString videoFilePath = "/home/pi/MeetingZone-MZ-/01_TcpClient_Commented/test1.mp4"; // 동영상 경로
+    cv::VideoCapture capture(videoFilePath.toStdString());
+    if (!capture.isOpened()) {
+        qDebug() << "[ERROR] 동영상을 열 수 없습니다:" << videoFilePath;
         return;
     }
 
-    ui->background->setPixmap(QPixmap(filePath));
-    picture.addPicture(filePath.toStdString());
+    while (tcpSocket->state() == QAbstractSocket::ConnectedState) {
+        cv::Mat frame;
+        if (!capture.read(frame)) {
+            qDebug() << "[INFO] 동영상 전송 완료.";
+            break;
+        }
+
+        // 프레임을 JPEG로 인코딩
+        std::vector<uchar> buffer;
+        cv::imencode(".jpg", frame, buffer);
+
+        // 크기 전송
+        qint64 frameSize = buffer.size();
+        tcpSocket->write(reinterpret_cast<const char*>(&frameSize), sizeof(frameSize));
+        tcpSocket->waitForBytesWritten();
+
+        // 데이터 전송
+        QByteArray frameData(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+        tcpSocket->write(frameData);
+        tcpSocket->waitForBytesWritten();
+
+        qDebug() << "[INFO] 프레임 전송 완료: 크기 =" << frameSize;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(33)); // 약 30 FPS
+    }
+
+    capture.release();
 }

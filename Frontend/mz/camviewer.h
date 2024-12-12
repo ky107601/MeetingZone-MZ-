@@ -8,6 +8,10 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QByteArray>
+
 class camViewer : public QLabel
 {
     Q_OBJECT
@@ -17,7 +21,7 @@ public:
     QPoint offset;
 
     void moveByKey(int key);
-
+    QByteArray XYToJson(QPoint xy);
 protected:
     void mouseMoveEvent(QMouseEvent *ev) override;
     void mousePressEvent(QMouseEvent *ev) override;

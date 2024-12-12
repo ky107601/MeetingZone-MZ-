@@ -9,18 +9,18 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add FFmpeg include directory and library directory
-include_directories(${CMAKE_SOURCE_DIR}/include/ffmpeg)  # Include FFmpeg headers
-link_directories(${CMAKE_SOURCE_DIR}/lib)               # Link FFmpeg static libraries
+# OpenCV & FFmpeg 라이브러리 경로 추가
+link_directories(${CMAKE_SOURCE_DIR}/lib)
+
+# OpenCV & FFmpeg 헤더 경로 추가
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include/opencv4)
 
 # Find Qt and OpenCV packages
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
-find_package(OpenCV REQUIRED)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network Concurrent)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network Concurrent)
 
-# Include OpenCV headers
-include_directories(${OpenCV_INCLUDE_DIRS})
-
+# Header & C++ Scripts
 set(PROJECT_SOURCES
     main.cpp
     widget.cpp
@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
     camviewer.cpp
     backgroundpicture.h
     backgroundpicture.cpp
+    networkmanager.h
+    networkmanager.cpp
 )
 
 # Define the executable
@@ -47,18 +49,35 @@ else()
     endif()
 endif()
 
-# Link FFmpeg, Qt Widgets, and OpenCV libraries
 target_link_libraries(mz
     PRIVATE
+    # Qt
     Qt${QT_VERSION_MAJOR}::Widgets
-    ${OpenCV_LIBS}            # Link OpenCV libraries
-    avcodec                   # FFmpeg libraries
-    avformat
-    avutil
-    swresample
-    swscale
+
+    # OpenCV
+    opencv_core
+    opencv_imgcodecs
+    opencv_imgproc
+    opencv_highgui
+    opencv_videoio
+    opencv_video
+
+    # ffmpeg
+    iconv
+    avcodec       # libavcodec.so
+    avformat      # libavformat.so
+    avutil        # libavutil.so
+    avdevice      # libavdevice.so
+    swresample    # libswresample.so
+    swscale       # libswscale.so
+    x264     
+
+    # etc.
     pthread                   # Required for FFmpeg and OpenCV
     m                         # Math library
+
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Concurrent
 )
 
 # Set macOS-specific properties (if applicable)
@@ -71,12 +90,45 @@ set_target_properties(mz PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
+
 # Install rules
 install(TARGETS mz
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+## == Media MTX == ##
+# 변수 정의
+set(MEDIAMTX_VERSION v1.9.3)
+set(MEDIAMTX_TARGZ mediamtx_${MEDIAMTX_VERSION}_linux_arm64v8.tar.gz)
+set(MEDIAMTX_DOWNLOAD_URL https://github.com/bluenviron/mediamtx/releases/download/${MEDIAMTX_VERSION}/${MEDIAMTX_TARGZ})
+
+# 다운로드 및 압축 해제
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/mediamtx_downloaded
+    COMMAND wget ${MEDIAMTX_DOWNLOAD_URL} -O ${CMAKE_BINARY_DIR}/${MEDIAMTX_TARGZ}
+    COMMAND tar -xvzf ${CMAKE_BINARY_DIR}/${MEDIAMTX_TARGZ} -C ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/mediamtx_downloaded
+    COMMENT "Downloading and extracting mediamtx from ${MEDIAMTX_DOWNLOAD_URL}"
+)
+
+# 빌드 타겟 추가
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/mediamtx_built
+    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/mediamtx_built
+    DEPENDS ${CMAKE_BINARY_DIR}/mediamtx_downloaded
+    COMMENT "Building mediamtx"
+)
+
+# mediamtx 다운로드 및 빌드 타겟
+add_custom_target(mediamtx ALL
+    DEPENDS ${CMAKE_BINARY_DIR}/mediamtx_built
+)
+## == Media MTX == ##
+
 
 # Finalize for Qt6
 if(QT_VERSION_MAJOR EQUAL 6)
