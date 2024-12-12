@@ -30,19 +30,19 @@ TARGET = server
 SRCS = server.cpp main.cpp video.cpp networkmanager.cpp
 OBJS = $(SRCS:.cpp=.o)
 
-# Update specific values of YAML file
-YAML_FILE = mediamtx.yml
-PROTOCOLS_KEY = protocols
-PROTOCOLS_VALUE = [tcp]
-ENCRYPTION_KEY = encryption
-ENCRYPTION_VALUE = "optional"
-
-update_config:
-	@echo "Updating $(PROTOCOLS_KEY) to $(PROTOCOLS_VALUE) in $(YAML_FILE)..."
-	sed -i 's/\($(PROTOCOLS_KEY):\).*/\1 $(PROTOCOLS_VALUE)/' $(YAML_FILE)
-	@echo "Updating $(ENCRYPTION_KEY) to $(ENCRYPTION_VALUE) in $(YAML_FILE)..."
-	sed -i 's/\($(ENCRYPTION_KEY):\).*/\1 $(ENCRYPTION_VALUE)/' $(YAML_FILE)
-	@echo "Update completed."
+# # Update specific values of YAML file
+# YAML_FILE = mediamtx.yml
+# PROTOCOLS_KEY = protocols
+# PROTOCOLS_VALUE = [tcp]
+# ENCRYPTION_KEY = encryption
+# ENCRYPTION_VALUE = "optional"
+# 
+# update_config:
+# 	@echo "Updating $(PROTOCOLS_KEY) to $(PROTOCOLS_VALUE) in $(YAML_FILE)..."
+# 	sed -i 's/\($(PROTOCOLS_KEY):\).*/\1 $(PROTOCOLS_VALUE)/' $(YAML_FILE)
+# 	@echo "Updating $(ENCRYPTION_KEY) to $(ENCRYPTION_VALUE) in $(YAML_FILE)..."
+# 	sed -i 's/\($(ENCRYPTION_KEY):\).*/\1 $(ENCRYPTION_VALUE)/' $(YAML_FILE)
+# 	@echo "Update completed."
 
 # Create key and cert file
 # KEY_FILE = server.key
@@ -87,8 +87,8 @@ install:
 	else \
 		echo "Unsupported OS: $(UNAME_S)"; exit 1; \
 	fi
-	# $(MAKE) update_config;
-	# $(MAKE) check_certs;
+#	# $(MAKE) update_config;
+#	# $(MAKE) check_certs;
 
 all: install $(TARGET)
 

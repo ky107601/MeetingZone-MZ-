@@ -42,8 +42,6 @@ private:
     uint8_t* buffer = nullptr;
     SwsContext* sws_ctx = nullptr;
 
-    cv::VideoCapture cap;
-
     // Inner Functions
     void configCodecParam();
     void setFrame();
@@ -71,7 +69,9 @@ public:
     void startRTSP(const std::string& rtsp_url);
     void stopRTSP();
 
-    void sendImage(cv::Mat& image, int& frame_count, int64_t& pts, AVPacket *pkt);
+    void openCamera(const std::string& rtsp_url);
+
+    void sendImage(cv::Mat& image, int& frame_count, int64_t& pts);
 };
 
 // original main code

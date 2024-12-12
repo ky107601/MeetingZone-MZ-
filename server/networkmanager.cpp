@@ -40,7 +40,7 @@ void NetworkManager::startMediaMTX() {
     // Command to start MediaMTX (adjust path as needed) | MediaMTX 서버 실행
     int result = std::system("./mediamtx &");
     if (result != 0) {
-        std::cerr << "Failed to start MediaMTX. Please ensure it's installed and accessible." << std::endl;
+        //std::cerr << "Failed to start MediaMTX. Please ensure it's installed and accessible." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -58,7 +58,7 @@ void NetworkManager::stopMediaMTX() {
     if (result != 0) {
         std::cerr << "Failed to stop MediaMTX. Please check manually." << std::endl;
     } else {
-        std::cout << "MediaMTX server stopped successfully." << std::endl;
+        //std::cout << "MediaMTX server stopped successfully." << std::endl;
     }
 }
 
@@ -90,7 +90,8 @@ void NetworkManager::freeAllAV() {
     return;
 }
 
-void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, AVPacket *pkt) {
+
+void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts) {
 
     // Convert to YUV format
     const uint8_t* data[1] = {image.data};
@@ -101,7 +102,7 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, A
     frame->pts = pts;
     pts += codec_ctx->time_base.den / codec_ctx->time_base.num;  // 프레임 간 일정 간격 유지
 
-    pkt = av_packet_alloc();
+    AVPacket* pkt = av_packet_alloc();
     int ret = avcodec_send_frame(codec_ctx, frame);
 
     while (ret >= 0) {
@@ -110,7 +111,7 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, A
             pkt->stream_index = video_stream->index;
             pkt->pts = pkt->dts = frame_count++;
 
-            std::cout << "PTS: " << pkt->pts << std::endl;
+            //std::cout << "PTS: " << pkt->pts << std::endl;
 
             // 패킷 쓰기 전 추가 검사
             if (pkt->pts >= 0) {
@@ -119,7 +120,7 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, A
                 if (ret < 0) {
                     char errbuf[AV_ERROR_MAX_STRING_SIZE];
                     av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-                    std::cerr << "Error writing frame: " << errbuf << std::endl;
+                    //std::cerr << "Error writing frame: " << errbuf << std::endl;
                 }
             }
             
@@ -129,7 +130,7 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, A
         } else {
             char errbuf[AV_ERROR_MAX_STRING_SIZE];
             av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-            std::cerr << "Error encoding frame: " << errbuf << std::endl;
+            //std::cerr << "Error encoding frame: " << errbuf << std::endl;
             break;
         }
     }
@@ -141,9 +142,10 @@ void NetworkManager::sendImage(cv::Mat& image, int& frame_count, int64_t& pts, A
 void NetworkManager::startRTSP(const std::string& rtsp_url) {
     // Initialize FFmpeg
     avformat_network_init();
+    
 
     // Video codec
-    const AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
+    const AVCodec* codec = avcodec_find_encoder_by_name("libx264");
     if (!codec) {
         std::cerr << "H.264 codec not found!" << std::endl;
         return;
@@ -159,6 +161,18 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
     // Configure codec parameters
     configCodecParam();
     
+    // AVDictionary* options = nullptr;
+    // av_dict_set(&options, "preset", "fast", 0);     // 인코딩 속도
+    // av_dict_set(&options, "tune", "zerolatency", 0); // 실시간 스트리밍 용도
+    // av_dict_set(&options, "profile", "high", 0);   // H.264 High 프로필
+
+    // if (avcodec_open2(codec_ctx, codec, &options) < 0) {
+    //     std::cerr << "Failed to open codec!" << std::endl;
+    //     avcodec_free_context(&codec_ctx);
+    //     return;
+    // }
+    // av_dict_free(&options);
+
     if (avcodec_open2(codec_ctx, codec, nullptr) < 0) {
         std::cerr << "Failed to open codec!" << std::endl;
         avcodec_free_context(&codec_ctx);
@@ -180,7 +194,7 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
 
     // Open output context
     if (avformat_alloc_output_context2(&output_ctx, nullptr, "rtsp", rtsp_url.c_str()) < 0) {
-        std::cerr << "Failed to create output context!" << std::endl;
+        //std::cerr << "Failed to create output context!" << std::endl;
         av_frame_free(&frame);
         av_free(buffer);
         avcodec_free_context(&codec_ctx);
@@ -189,13 +203,13 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
 
     video_stream = avformat_new_stream(output_ctx, nullptr);
     if (!video_stream) {
-        std::cerr << "Failed to create video stream!" << std::endl;
+        //std::cerr << "Failed to create video stream!" << std::endl;
         freeAllAV();
         return;
     }
 
     if (avcodec_parameters_from_context(video_stream->codecpar, codec_ctx) < 0) {
-        std::cerr << "Failed to copy codec parameters!" << std::endl;
+        //std::cerr << "Failed to copy codec parameters!" << std::endl;
         freeAllAV();
         return;
     }
@@ -221,7 +235,7 @@ void NetworkManager::startRTSP(const std::string& rtsp_url) {
         codec_ctx->width, codec_ctx->height, codec_ctx->pix_fmt,
         SWS_BILINEAR, nullptr, nullptr, nullptr);
 
-    std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
+    //std::cout << "RTSP streaming started on " << rtsp_url << std::endl;
 }
 
 
