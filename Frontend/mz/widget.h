@@ -99,7 +99,7 @@ private:
 
     // updateFrame()
     Mat& captureNewFrame();
-    void getVideo();
+    void getVideo(QString serverIP);
     void sendVideo();
 };
 #endif // WIDGET_H

@@ -49,7 +49,7 @@ private:
     uint8_t* buffer = nullptr;
     SwsContext* sws_ctx = nullptr;
 
-    cv::VideoCapture cap;
+    cv::VideoCapture clientCap, serverCap;
 
     // Inner Functions
     void configCodecParam();
@@ -82,6 +82,9 @@ public:
     // Function for RTSP Streaming
     void startRTSP(const std::string& rtsp_url);
     void stopRTSP();
+
+    void openStream(const std::string& serverIP);
+    cv::Mat& getFrame(cv::Mat& frame);
 };
 
 #endif // NETWORKMANAGER_H
