@@ -96,13 +96,29 @@ void NetworkManager::openCamera() {
         "libcamerasrc camera-name=/base/axi/pcie@120000/rp1/i2c@88000/ov5647@36 ! video/x-raw, width="
         + std::to_string(width) + ",height=" + std::to_string(height) + ",framerate=" + std::to_string(frameRate)
         + "/1,format=RGBx ! videoconvert ! videoscale ! appsink";
-    cap.open(pipeline, cv::CAP_GSTREAMER);
+    clientCap.open(pipeline, cv::CAP_GSTREAMER);
 
-    if (!cap.isOpened()) {
+    if (!clientCap.isOpened()) {
         std::cerr << "Failed to open camera!" << std::endl;
         freeAllAV();
         return;
     }
+}
+
+void NetworkManager::openStream(const std::string& serverIP) {
+    std::string pipeline = "rtsp://" + serverIP + ":8554/camera";
+    serverCap.open(pipeline, cv::CAP_FFMPEG);
+
+    if (!serverCap.isOpened()) {
+        std::cerr << "Failed to open stream!" << std::endl;
+        return;
+    }
+}
+
+cv::Mat& NetworkManager::getFrame(cv::Mat& frame) {
+    serverCap.read(frame);
+
+    return frame;
 }
 
 
@@ -157,7 +173,7 @@ void NetworkManager::sendImages() {
     AVPacket *pkt = nullptr;
     int frameCounter = 0;
 
-    while(cap.read(image)) {
+    while(clientCap.read(image)) {
 
         // updateImage(image, frameCounter);
 
