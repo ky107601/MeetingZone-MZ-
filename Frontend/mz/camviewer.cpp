@@ -1,4 +1,6 @@
 #include "camviewer.h"
+#include "widget.h"
+#include <QThread>
 
 camViewer::camViewer(QWidget*parent) : QLabel(parent)
 {
@@ -11,14 +13,14 @@ void camViewer::mouseMoveEvent(QMouseEvent *event)
     qDebug() << "mouseMoveEvent()";
     if (event->buttons() & Qt::LeftButton) { //drag
         QPoint newPos = event->globalPos() - offset; //실제로 이동
-        qDebug()<<"pos = "<<newPos;
+        qDebug() << "pos = " << newPos;
         if(newPos.x() > 10 && newPos.x()< 661 && newPos.y() > 10 && newPos.y() < 355)
         {
             position = newPos;
-            qDebug() << "(" << position.x() <<", "<<position.y() <<") 로 이동";
+            qDebug() << "(" << position.x() << ", " << position.y() << ") 로 이동";
             this->move(newPos);
 
-            XYToJson(newPos);
+          //  XYToJson();
         }
     }
 }
@@ -34,46 +36,50 @@ void camViewer::mousePressEvent(QMouseEvent *event)
 void camViewer::moveByKey(int key)
 {
     //left : 16777234, down : 16777235, right : 16777236, up : 16777237
+    //left : 65, down : 83, right : 68, up: 87
     switch(key)
     {
-     case 16777234: //left
+     case 65: //left
         if(this->pos().x() - 5 > 5) //limit
         {
-            move(this->pos().x() - 5, this->pos().y());
-            XYToJson(QPoint(this->pos().x() - 5, this->pos().y()));
+            this->move(this->pos().x() - 5, this->pos().y());
+            qDebug() << "(" << this->pos().x() << ", " << this->pos().y() << ") 로 이동";
+           // XYToJson();
         }
         break;
-     case 16777235: //up
+     case 87: //up
          if(this->pos().y() - 5 > 5)
          {
-            move(this->pos().x(), this->pos().y() - 5);
-             XYToJson(QPoint(this->pos().x(), this->pos().y() - 5));
+            this->move(this->pos().x(), this->pos().y() - 5);
+              qDebug() << "(" << this->pos().x() << ", " << this->pos().y() << ") 로 이동";
+            // XYToJson();
          }
         break;
-     case 16777236: //right
+     case 68: //right
          if(this->pos().x() + 5 < 666)
          {
-            move(this->pos().x() + 5, this->pos().y());
-             XYToJson(QPoint(this->pos().x() + 5, this->pos().y()));
+            this->move(this->pos().x() + 5, this->pos().y());
+              qDebug() << "(" << this->pos().x() << ", " << this->pos().y() << ") 로 이동";
+            // XYToJson();
          }
         break;
-     case 16777237: //down
+     case 83: //down
          if(this->pos().y() + 5 < 360)
          {
-             move(this->pos().x(), this->pos().y() + 5);
-             XYToJson(QPoint(this->pos().x(), this->pos().y() + 5));
+             this->move(this->pos().x(), this->pos().y() + 5);
+              qDebug() << "(" << this->pos().x() << ", " << this->pos().y() << ") 로 이동";
+            // XYToJson();
          }
          break;
-
     }
 }
 
-QByteArray camViewer::XYToJson(QPoint xy)
+QByteArray camViewer::XYToJson()
 {
     // JSON으로 변환
     QJsonObject json;
-    json["x"] = xy.x();
-    json["y"] = xy.y();
+    json["x"] = this->pos().x();
+    json["y"] = this->pos().y();
     QJsonDocument doc(json);
     QByteArray serializedData = doc.toJson(QJsonDocument::Compact);
 
@@ -81,16 +87,5 @@ QByteArray camViewer::XYToJson(QPoint xy)
 
     return serializedData;
 
-
-    // // 전송
-    // if (tcpSocket->state() == QAbstractSocket::ConnectedState) {
-    //     qint64 bytesWritten = tcpSocket->write(serializedData);
-    //     if (bytesWritten == -1) {
-    //         qDebug() << "Failed to send data:" << tcpSocket->errorString();
-    //     } else {
-    //         qDebug() << "Sent data:" << serializedData;
-    //     }
-    // } else {
-    //     qDebug() << "Socket not connected!";
-    // }
+    //sendDataToWidget(serializedData);
 }
