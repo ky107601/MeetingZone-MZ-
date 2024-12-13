@@ -7,6 +7,12 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 
+int frameCounter = 0; //if 30th, add effect
+Mat nowFrame; // get frame
+Mat grabcutFrame; // Use grabcut
+bool isProc = false; // if thread is living
+pthread_mutex_t frameMutex = PTHREAD_MUTEX_INITIALIZER;
+
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget), tcpSocket(new QTcpSocket(this))
@@ -75,59 +81,116 @@ void Widget::changeIcon()
     ui->micBtn->setIconSize(QSize(40, 40));
 }
 
+void* Widget::grabCutProc(void* arg) {  //apply grabcut
+    qDebug() << "create grabcut thread";
+
+    Mat frameROI, prevMask, bgModel, fgModel, binaryMask;
+    //Rect roi;
+
+    // get frame
+    pthread_mutex_lock(&frameMutex);
+    Mat frame = nowFrame.clone();
+    pthread_mutex_unlock(&frameMutex);
+
+    // roi
+    Rect roi(10, 10, frame.cols-20, frame.rows-20);
+    frameROI = frame(roi);
+    qDebug() << "set roi";
+
+    // clean grabcut
+    prevMask = Mat(frameROI.size(), CV_8UC1, Scalar(GC_BGD));
+    Rect initRect(10, 10, frameROI.cols - 20, frameROI.rows - 20);
+    prevMask(initRect).setTo(Scalar(GC_PR_FGD));
+
+    qDebug() << "frameROI size:" << frameROI.cols << "x" << frameROI.rows << "  frameROI type:" << frameROI.type();
+    qDebug() << "prevMask size:" << prevMask.cols << "x" << prevMask.rows << "  prevMask type:" << prevMask.type();
+    qDebug() << "initRect:" << initRect.x << "," << initRect.y << ","
+             << initRect.width << "," << initRect.height;
+    if (initRect.x + initRect.width > frameROI.cols ||
+        initRect.y + initRect.height > frameROI.rows) {
+        qDebug() << "Error: initRect exceeds frameROI bounds";
+    }
+
+    qDebug() << "frameROI type: " << frameROI.type();
+    qDebug() << "frameROI depth: " << frameROI.depth();
+    qDebug() << "frameROI channels: " << frameROI.channels();
+    qDebug() << "prevMask type: " << prevMask.type();
+    qDebug() << "prevMask depth: " << prevMask.depth();
+    qDebug() << "prevMask channels: " << prevMask.channels();
+
+    try {
+        cv::grabCut(frameROI, prevMask, initRect, bgModel, fgModel, 1, GC_INIT_WITH_RECT);
+        qDebug() << "grabCut Called";
+    } catch (const cv::Exception& e) {
+        qDebug() << "GrabCut failed with error:" << e.what();
+        return nullptr;
+    }
+
+    qDebug() << "clean grabcut";
+
+    // make prevmask
+    binaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
+
+    // make rgba image
+    Mat transparentImg(frame.size(), CV_8UC4, Scalar(0, 0, 0, 0));
+    vector<Mat> bgrChannels;
+    split(frame, bgrChannels); // BGR
+
+    cv::resize(binaryMask, binaryMask, frame.size());
+
+    Mat alphaChannel(binaryMask.size(), CV_8UC1, Scalar(0));
+    binaryMask.convertTo(alphaChannel, CV_8UC1, 255.0);
+    bgrChannels.push_back(alphaChannel); // add alpha channel
+    for (size_t i = 0; i < bgrChannels.size(); i++) {
+        qDebug() << "Channel " << i << ": size=" << bgrChannels[i].cols << "x" << bgrChannels[i].rows
+                 << ", type=" << bgrChannels[i].type();
+    }
+    qDebug() << "Alpha channel: size=" << alphaChannel.cols << "x" << alphaChannel.rows
+             << ", type=" << alphaChannel.type();
+    cv::merge(bgrChannels, transparentImg);  // make rgba image
+    qDebug() << "merge image";
+
+    // mutex lock
+    pthread_mutex_lock(&frameMutex);
+    grabcutFrame = transparentImg.clone();
+    isProc = false; // finish
+    qDebug() << "isProc : false";
+    pthread_mutex_unlock(&frameMutex);
+
+    return nullptr;
+}
+
+
 void Widget::updateFrame()
 {
-    // // GrabCut 상태 유지
-    // static Mat prevMask, bgModel, fgModel;
-    // static bool isInitialized = false;
-    // static int frameCounter = 0;
-    // static Mat lastBinaryMask, prevFrame;
-
-    // Mat frame = captureNewFrame();
-    // // 관심 영역 (ROI) 동적 설정
-    // Rect roi(10, 10, frame.cols-20, frame.rows-20);
-    // frameROI = frame(roi);
-    // frame.copyTo(prevFrame);
-    // // GrabCut 초기화
-    // if (!isInitialized) {
-    //     prevMask = Mat(frameROI.size(), CV_8UC1, Scalar(GC_BGD));
-    //     Rect initRect(10, 10, frameROI.cols - 20, frameROI.rows - 20);
-    //     prevMask(initRect).setTo(Scalar(GC_PR_FGD));
-    //     grabCut(frameROI, prevMask, initRect, bgModel, fgModel, 5, GC_INIT_WITH_RECT);
-    //     lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
-    //     isInitialized = true;
-    // }
-
-    // // 프레임 샘플링 (10프레임마다 GrabCut 실행)
-    // if (frameCounter % 10 == 0) {
-    //     grabCut(frameROI, prevMask, Rect(), bgModel, fgModel, 1, GC_INIT_WITH_MASK);
-    //     lastBinaryMask = (prevMask == GC_FGD) | (prevMask == GC_PR_FGD);
-    // }
-
-    // // ROI 기반 이진 마스크 축소/확대
-    // Mat smallMask, binaryMask;
-    // cv::resize(lastBinaryMask, smallMask, Size(), 0.5, 0.5, INTER_NEAREST);
-    // cv::resize(smallMask, binaryMask, frame.size(), 0, 0, INTER_NEAREST);
-
-    // // RGBA 이미지 생성
-    // Mat transparentImg(frame.size(), CV_8UC4, Scalar(0, 0, 0, 0));
-    // vector<Mat> bgrChannels;
-    // split(frame, bgrChannels);
-
-    // Mat alphaChannel;
-    // binaryMask.convertTo(alphaChannel, CV_8UC1, 255.0);
-    // bgrChannels.push_back(alphaChannel);
-    // merge(bgrChannels, transparentImg);
-
-    // // Convert to QImage with transparency
-    // QImage qimg(transparentImg.data, transparentImg.cols, transparentImg.rows, transparentImg.step, QImage::Format_RGBA8888);
-
-    // //라벨에 표시
-    // cam->setFixedSize(transparentImg.cols / 5, transparentImg.rows / 5);
-    // cam->setPixmap(QPixmap::fromImage(qimg).scaled(cam->size(), Qt::KeepAspectRatio));
-
-    // // 프레임 카운터 증가
-    // frameCounter++;
+    //frame update
+    pthread_mutex_lock(&frameMutex);
+    nowFrame = recFrame.clone();
+    pthread_mutex_unlock(&frameMutex);
+    qDebug() << "frameCount : " << frameCounter;
+    //if (frameCounter == 25 && !isProc) {
+    if (frameCounter==25 && !isProc) {
+        // start grabcut
+        isProc = true;
+        pthread_t grabCutThread;
+        pthread_create(&grabCutThread, nullptr, grabCutProc, nullptr);
+        pthread_detach(grabCutThread);
+    }
+    
+    // select frame for print
+    //Mat displayFrame;
+    pthread_mutex_lock(&frameMutex);
+    if (!grabcutFrame.empty()) {
+        cvtColor(grabcutFrame, recFrame, COLOR_BGR2RGB);
+    } else {
+        cvtColor(recFrame, recFrame, COLOR_BGR2RGB);
+    }
+    pthread_mutex_unlock(&frameMutex);
+    
+    //change format for Qt
+    
+    
+    frameCounter++;
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
@@ -351,60 +414,6 @@ Mat& Widget::captureNewFrame() {
     return frame;
 }
 
-// // 통합 비디오 수신 및 재생
-// void Widget::getVideo() {
-//     qDebug() << tcpSocket->state();
-//     while (tcpSocket->state() == QAbstractSocket::ConnectedState) {
-//         // 프레임 크기 읽기
-//         qDebug() << "영상 수신 시도";
-//         int64_t frameSize = 0;
-//         if (tcpSocket->bytesAvailable() < sizeof(frameSize)) {
-
-//             if (!tcpSocket->waitForReadyRead()) { // Wait for the frame size
-//                 cerr << "[ERROR] Waiting for frame size failed" << endl;
-//                 //return;
-//             }
-//         }
-//          tcpSocket->read(reinterpret_cast<char*>(&frameSize), sizeof(frameSize));
-
-//         if (frameSize <= 0 || frameSize > 10 * 1024 * 1024) { // Sanity check
-//             cerr << "[ERROR] Invalid frame size received: " << frameSize << endl;
-//             return;
-//         }
-
-//         // 프레임 읽기
-//         QByteArray frameData;
-//         while (frameData.size() < frameSize) {
-//             if (!tcpSocket->waitForReadyRead()) { // Wait for more data
-//                 cerr << "[ERROR] Frame data reception timed out" << endl;
-//                 return;
-//             }
-//             frameData.append(tcpSocket->read(frameSize - frameData.size()));
-//         }
-
-//         // 프레임 디코드
-//         vector<uchar> buffer(frameData.begin(), frameData.end());
-//         recFrame = imdecode(buffer, IMREAD_COLOR);
-
-//         // OpenCV 처리해야하는 부분
-
-//         if (recFrame.empty()) {
-//             cerr << "[ERROR] Failed to decode the frame" << endl;
-//             continue;
-//         }
-
-//         // Mat -> QImage
-//         QImage img((const uchar*)recFrame.data, recFrame.cols, recFrame.rows, recFrame.step, QImage::Format_RGB888);
-//         img = img.rgbSwapped(); // Convert BGR to RGB
-
-//         //videoWindow->setFixedSize(img.width(), img.height());
-//         videoWindow->setPixmap(QPixmap::fromImage(img).scaled(videoWindow->size(), Qt::KeepAspectRatio));
-
-//         // 선택: Introduce a small delay for smoother playback
-//         QCoreApplication::processEvents();
-//     }
-// }
-
 void Widget::getVideo(QString serverIP)
 {
     NetworkManager& networkManager = NetworkManager::getInstance();
@@ -419,6 +428,7 @@ void Widget::getVideo(QString serverIP)
         recFrame = networkManager.getFrame(recFrame);
 
         // OpenCV 처리해야하는 부분
+        updateFrame();
 
         if (recFrame.empty()) {
             cerr << "[ERROR] Failed to decode the frame" << endl;
